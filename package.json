@@ -1,0 +1,48 @@
+{
+  "name": "borama-food-delivery",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "clean": "tsx scripts/clean-next.ts",
+    "dev": "tsx scripts/clean-next.ts && tsx scripts/start-mongo.ts && next dev",
+    "dev:clean": "tsx scripts/clean-next.ts && tsx scripts/start-mongo.ts && next dev",
+    "seed:users": "tsx scripts/seed-users.ts",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "mongo:start": "tsx scripts/start-mongo.ts",
+    "mongo:init": "tsx scripts/init-replica.ts",
+    "setup:local": "tsx scripts/setup-local.ts"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "bcryptjs": "^3.0.2",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^0.511.0",
+    "next": "^15.3.3",
+    "next-auth": "^4.24.11",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-leaflet": "^5.0.0",
+    "recharts": "^2.15.3",
+    "tailwind-merge": "^3.3.0",
+    "zod": "^3.25.42"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@tailwindcss/postcss": "^4.1.8",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/leaflet": "^1.9.18",
+    "@types/node": "^22.15.29",
+    "@types/react": "^19.1.6",
+    "@types/react-dom": "^19.1.5",
+    "eslint": "^9.28.0",
+    "eslint-config-next": "^15.3.3",
+    "mongodb": "^6.21.0",
+    "tailwindcss": "^4.1.8",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}
