@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Fast delivery">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1e3a5f"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg2)"/>
+  <rect x="0" y="420" width="800" height="180" fill="#334155"/>
+  <line x1="0" y1="480" x2="800" y2="480" stroke="#f8fafc" stroke-width="4" stroke-dasharray="40 30" opacity="0.5"/>
+  <ellipse cx="280" cy="500" rx="200" ry="20" fill="#000" opacity="0.3"/>
+  <path d="M120 380 L200 320 L380 320 L420 380 L120 380 Z" fill="#ea580c"/>
+  <rect x="200" y="300" width="140" height="80" rx="8" fill="#c2410c"/>
+  <text x="250" y="350" fill="#fff7ed" font-family="Arial,sans-serif" font-size="28" font-weight="bold" text-anchor="middle">FOOD</text>
+  <circle cx="160" cy="400" r="55" fill="#1e293b" stroke="#94a3b8" stroke-width="8"/>
+  <circle cx="400" cy="400" r="55" fill="#1e293b" stroke="#94a3b8" stroke-width="8"/>
+  <rect x="240" y="260" width="100" height="60" rx="10" fill="#fbbf24"/>
+  <path d="M200 200 Q320 120 440 200 L420 280 L220 280 Z" fill="#ea580c"/>
+  <circle cx="320" cy="180" r="40" fill="#ffedd5"/>
+  <rect x="500" y="200" width="220" height="140" rx="16" fill="#0ea5e9" opacity="0.2"/>
+  <text x="610" y="280" fill="#7dd3fc" font-family="Arial,sans-serif" font-size="22" text-anchor="middle">On the way!</text>
+</svg>

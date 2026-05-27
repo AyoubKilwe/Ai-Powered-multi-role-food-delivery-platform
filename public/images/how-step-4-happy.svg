@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Happy and satisfied">
+  <defs>
+    <linearGradient id="bg4" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#14532d"/>
+      <stop offset="50%" stop-color="#166534"/>
+      <stop offset="100%" stop-color="#052e16"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg4)"/>
+  <circle cx="200" cy="180" r="70" fill="#fbbf24" opacity="0.35"/>
+  <circle cx="600" cy="140" r="50" fill="#fbbf24" opacity="0.3"/>
+  <!-- Person 1 -->
+  <circle cx="220" cy="280" r="48" fill="#ffedd5"/>
+  <circle cx="208" cy="275" r="5" fill="#1c1917"/>
+  <circle cx="232" cy="275" r="5" fill="#1c1917"/>
+  <path d="M205 295 Q220 308 235 295" stroke="#1c1917" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <ellipse cx="220" cy="390" rx="55" ry="75" fill="#ea580c"/>
+  <!-- Person 2 -->
+  <circle cx="400" cy="265" r="52" fill="#fde68a"/>
+  <circle cx="386" cy="260" r="5" fill="#1c1917"/>
+  <circle cx="414" cy="260" r="5" fill="#1c1917"/>
+  <path d="M382 282 Q400 300 418 282" stroke="#1c1917" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <ellipse cx="400" cy="385" rx="58" ry="78" fill="#f97316"/>
+  <!-- Person 3 -->
+  <circle cx="580" cy="290" r="46" fill="#fecaca"/>
+  <circle cx="568" cy="285" r="5" fill="#1c1917"/>
+  <circle cx="592" cy="285" r="5" fill="#1c1917"/>
+  <path d="M565 305 Q580 318 595 305" stroke="#1c1917" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <ellipse cx="580" cy="395" rx="52" ry="72" fill="#fb923c"/>
+  <!-- Stars (drawn as paths, no special characters) -->
+  <polygon points="320,500 328,522 352,522 333,536 341,558 320,544 299,558 307,536 288,522 312,522" fill="#fbbf24"/>
+  <polygon points="400,490 406,506 424,506 410,516 416,532 400,522 384,532 390,516 376,506 394,506" fill="#fbbf24"/>
+  <polygon points="480,500 488,522 512,522 493,536 501,558 480,544 459,558 467,536 448,522 472,522" fill="#fbbf24"/>
+  <polygon points="360,520 364,530 376,530 366,536 370,548 360,542 350,548 354,536 344,530 356,530" fill="#fde047"/>
+  <polygon points="440,515 444,525 456,525 446,531 450,543 440,537 430,543 434,531 424,525 436,525" fill="#fde047"/>
+</svg>

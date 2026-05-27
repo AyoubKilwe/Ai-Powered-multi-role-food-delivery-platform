@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Bariis dish illustration">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f97316" />
+      <stop offset="100%" stop-color="#7c2d12" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" rx="48" fill="url(#bg)" />
+  <circle cx="620" cy="420" r="220" fill="#fff7ed" fill-opacity="0.22" />
+  <ellipse cx="610" cy="470" rx="250" ry="150" fill="#fff" fill-opacity="0.9" />
+  <ellipse cx="610" cy="445" rx="200" ry="110" fill="#fbbf24" />
+  <circle cx="530" cy="410" r="28" fill="#c2410c" />
+  <circle cx="620" cy="380" r="28" fill="#166534" />
+  <circle cx="700" cy="430" r="28" fill="#9a3412" />
+  <text x="70" y="120" fill="#fff7ed" font-family="Inter, Arial, sans-serif" font-size="64" font-weight="800">Bariis Iskukaris</text>
+</svg>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" role="img" aria-label="Login background">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#111827" />
+      <stop offset="100%" stop-color="#7c2d12" />
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)" />
+  <circle cx="1300" cy="300" r="250" fill="#f59e0b" fill-opacity="0.18" />
+  <circle cx="540" cy="760" r="320" fill="#fff" fill-opacity="0.06" />
+  <path d="M300 750c210-130 520-190 780-150 230 36 410 130 520 250" fill="none" stroke="#fff7ed" stroke-opacity="0.18" stroke-width="34" stroke-linecap="round" />
+  <text x="120" y="180" fill="#fff7ed" font-family="Inter, Arial, sans-serif" font-size="82" font-weight="800">Welcome to BoramaFood</text>
+  <text x="120" y="260" fill="#ffedd5" font-family="Inter, Arial, sans-serif" font-size="38" font-weight="500">Sign in to order, deliver, and manage your restaurant</text>
+</svg>

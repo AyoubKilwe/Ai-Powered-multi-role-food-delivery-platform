@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" role="img" aria-label="Kitchen background">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1e3a8a" />
+      <stop offset="100%" stop-color="#111827" />
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#bg)" />
+  <rect x="150" y="150" width="1620" height="780" rx="48" fill="#fff" fill-opacity="0.06" />
+  <circle cx="520" cy="420" r="180" fill="#f97316" fill-opacity="0.35" />
+  <circle cx="1180" cy="420" r="180" fill="#fbbf24" fill-opacity="0.25" />
+  <path d="M360 760c160-90 320-140 600-140s440 50 600 140" fill="none" stroke="#fff" stroke-opacity="0.22" stroke-width="28" stroke-linecap="round" />
+</svg>
