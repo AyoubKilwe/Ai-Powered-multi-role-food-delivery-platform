@@ -53,9 +53,32 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Email, password, and role are required");
         }
 
+        const loginEmail = credentials.email.trim().toLowerCase();
+        const loginRole = credentials.role.trim().toUpperCase() as Role;
+
+        const adminUsername =
+          process.env.ADMIN_LOGIN_USERNAME?.trim().toLowerCase();
+        const adminPassword = process.env.ADMIN_LOGIN_PASSWORD;
+
+        if (
+          loginRole === "ADMIN" &&
+          adminUsername &&
+          adminPassword &&
+          loginEmail === adminUsername &&
+          credentials.password === adminPassword
+        ) {
+          return {
+            id: "admin-env",
+            email: adminUsername,
+            name: process.env.ADMIN_LOGIN_NAME || "System Admin",
+            role: "ADMIN",
+            status: "ACTIVE",
+          };
+        }
+
         const { db } = await import("./db");
         const user = await db.user.findUnique({
-          where: { email: credentials.email },
+          where: { email: loginEmail },
           include: { restaurant: true },
         });
 
@@ -64,9 +87,9 @@ export const authOptions: NextAuthOptions = {
         const valid = await bcrypt.compare(credentials.password, user.password);
         if (!valid) throw new Error("Invalid email or password");
 
-        if (user.role !== credentials.role) {
+        if (String(user.role).toUpperCase() !== loginRole) {
           throw new Error(
-            `This account is not registered as ${credentials.role}. Select the correct role.`,
+            `This account is not registered as ${loginRole}. Select the correct role.`,
           );
         }
 

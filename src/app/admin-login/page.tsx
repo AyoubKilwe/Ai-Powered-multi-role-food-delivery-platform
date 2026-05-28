@@ -8,7 +8,8 @@ export default function AdminLoginPage() {
       allowedRoles={["ADMIN"]}
       defaultRole="ADMIN"
       title="Admin sign in"
-      subtitle="Only admin accounts can enter here. Use your secure platform credentials."
+      subtitle="Use your admin username and password here."
+      identifierLabel="Username"
       adminLinkHref="/login"
       adminLinkLabel="Back to public sign in"
     />

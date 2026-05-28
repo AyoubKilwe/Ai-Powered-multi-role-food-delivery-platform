@@ -80,9 +80,10 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const data = schema.parse(body);
+    const email = data.email.trim().toLowerCase();
 
     const exists = await db.user.findUnique({
-      where: { email: data.email },
+      where: { email },
     });
     if (exists) {
       return NextResponse.json(
@@ -101,7 +102,7 @@ export async function POST(req: Request) {
     const user = await db.user.create({
       data: {
         name: data.name,
-        email: data.email,
+        email,
         phone: data.phone,
         password: hashed,
         address: data.address,

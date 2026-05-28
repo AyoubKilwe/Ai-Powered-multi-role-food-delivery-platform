@@ -71,6 +71,7 @@ type LoginClientProps = {
   defaultRole?: Role;
   title?: string;
   subtitle?: string;
+  identifierLabel?: string;
   adminLinkHref?: string;
   adminLinkLabel?: string;
 };
@@ -80,6 +81,7 @@ export default function LoginClient({
   defaultRole = "CUSTOMER",
   title = "Choose your role",
   subtitle = "Pick the account type you\'re logging into.",
+  identifierLabel = "Email",
   adminLinkHref,
   adminLinkLabel,
 }: LoginClientProps) {
@@ -242,7 +244,7 @@ export default function LoginClient({
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <Input
-                  label="Email"
+                  label={identifierLabel}
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
