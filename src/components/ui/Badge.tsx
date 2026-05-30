@@ -14,16 +14,25 @@ const colors: Record<string, string> = {
   CONFIRMED: "bg-green-100 text-green-800",
 };
 
-export function Badge({ status, className }: { status: string; className?: string }) {
+export function Badge({
+  status,
+  className,
+}: {
+  status?: string | null;
+  className?: string;
+}) {
+  const safe = typeof status === "string" && status ? status : "UNKNOWN";
+  const label = safe.replace(/_/g, " ").toLowerCase();
+  const display = label.charAt(0).toUpperCase() + label.slice(1);
   return (
     <span
       className={cn(
         "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
-        colors[status] || "bg-stone-100 text-stone-700",
-        className
+        colors[safe] || "bg-stone-100 text-stone-700",
+        className,
       )}
     >
-      {status.replace(/_/g, " ")}
+      {display}
     </span>
   );
 }

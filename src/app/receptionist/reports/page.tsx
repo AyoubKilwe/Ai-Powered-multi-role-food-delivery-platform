@@ -27,7 +27,14 @@ export default function ReportsPage() {
   useEffect(() => {
     fetch("/api/receptionist")
       .then((r) => r.json())
-      .then((d) => setSales(d.sales));
+      .then((d) => {
+        const fallback = { revenue: 0, orders: 0 };
+        setSales({
+          daily: d?.sales?.daily ?? fallback,
+          weekly: d?.sales?.weekly ?? fallback,
+          monthly: d?.sales?.monthly ?? fallback,
+        });
+      });
   }, []);
 
   if (!sales) return <p>Loading...</p>;

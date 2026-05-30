@@ -23,6 +23,20 @@ export default function BookingsPage() {
       .then((d) => setBookings(d.bookings));
   useEffect(() => {
     load();
+    const interval = setInterval(load, 5000);
+    function onVisibility() {
+      if (document.visibilityState === "visible") load();
+    }
+    function onFocus() {
+      load();
+    }
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("focus", onFocus);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("focus", onFocus);
+    };
   }, []);
 
   async function updateStatus(id: string, status: string) {
@@ -41,7 +55,7 @@ export default function BookingsPage() {
         <article key={b.id} className="rounded-xl border bg-white p-4">
           <div className="flex justify-between">
             <div>
-              <p className="font-semibold">{b.customer.name}</p>
+              <p className="font-semibold">{b.customer?.name ?? "Guest"}</p>
               <p className="text-sm">
                 {new Date(b.date).toLocaleDateString()} — {b.timeSlot}
               </p>

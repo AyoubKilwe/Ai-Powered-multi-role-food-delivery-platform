@@ -36,6 +36,8 @@ interface Restaurant {
   logo?: string | null;
   images?: string[];
   address?: string;
+  tables?: { id: string; tableNumber: number; capacity: number }[];
+  timeSlots?: { id: string; label: string; capacity: number }[];
 }
 
 export default function RestaurantPage() {
@@ -174,6 +176,56 @@ export default function RestaurantPage() {
                   ))}
                 </div>
               )}
+
+              <div className="mt-6 rounded-2xl border border-stone-200 bg-stone-50 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-semibold text-stone-900">
+                      Dine-in availability
+                    </p>
+                    <p className="text-xs text-stone-500">
+                      {restaurant.tables?.length || 0} tables •{" "}
+                      {restaurant.timeSlots?.length || 0} time slots
+                    </p>
+                  </div>
+                  <Link
+                    href={`/customer/booking?restaurantId=${id}`}
+                    className="rounded-full bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
+                  >
+                    Book a table
+                  </Link>
+                </div>
+
+                {restaurant.tables && restaurant.tables.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {restaurant.tables.slice(0, 8).map((table) => (
+                      <span
+                        key={table.id}
+                        className="inline-flex items-center rounded-full border border-stone-300 bg-white px-3 py-1 text-xs font-medium text-stone-700"
+                      >
+                        Table {table.tableNumber} • {table.capacity} seats
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-3 text-sm text-stone-500">
+                    No table list yet. You can still order food from the menu.
+                  </p>
+                )}
+
+                {restaurant.timeSlots && restaurant.timeSlots.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {restaurant.timeSlots.slice(0, 6).map((slot) => (
+                      <span
+                        key={slot.id}
+                        className="inline-flex items-center rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700"
+                      >
+                        {slot.label}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="border-t border-stone-200 bg-stone-50 p-6 sm:p-8 lg:border-l lg:border-t-0">

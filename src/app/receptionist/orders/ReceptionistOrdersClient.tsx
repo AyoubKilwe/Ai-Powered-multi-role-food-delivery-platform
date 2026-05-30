@@ -27,7 +27,19 @@ export default function ReceptionistOrdersClient() {
   useEffect(() => {
     load();
     const i = setInterval(load, 8000);
-    return () => clearInterval(i);
+    function onVisibility() {
+      if (document.visibilityState === "visible") load();
+    }
+    function onFocus() {
+      load();
+    }
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("focus", onFocus);
+    return () => {
+      clearInterval(i);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("focus", onFocus);
+    };
   }, []);
 
   async function updateStatus(id: string, status: string) {
@@ -86,8 +98,8 @@ export default function ReceptionistOrdersClient() {
                   {o.orderNumber}
                 </p>
                 <p className="mt-1 text-sm text-stone-500">
-                  {o.customer.name}
-                  {o.customer.phone ? ` • ${o.customer.phone}` : ""}
+                  {o.customer?.name ?? "Guest"}
+                  {o.customer?.phone ? ` • ${o.customer.phone}` : ""}
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -99,9 +111,9 @@ export default function ReceptionistOrdersClient() {
             </div>
 
             <ul className="mt-4 space-y-2 rounded-2xl bg-stone-50 p-4 text-sm text-stone-700">
-              {o.items.map((item, i) => (
+              {(o.items || []).map((item, i) => (
                 <li key={i} className="flex items-center justify-between gap-3">
-                  <span>{item.menuItem.name}</span>
+                  <span>{item.menuItem?.name ?? "Item"}</span>
                   <span className="font-semibold">x{item.quantity}</span>
                 </li>
               ))}

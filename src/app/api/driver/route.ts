@@ -7,6 +7,11 @@ type View = "dashboard" | "orders" | "commissions" | "documents";
 
 const driverOrderSelect = {
   id: true,
+  orderNumber: true,
+  status: true,
+  total: true,
+  deliveryAddress: true,
+  deliveryLat: true,
   deliveryLng: true,
   driverLat: true,
   driverLng: true,
@@ -36,7 +41,11 @@ async function loadDriverContext(sessionUserId: string, view: View) {
 
   const orders = await db.order.findMany({
     where: {
-      OR: [{ driverId: sessionUserId }, { status: "READY", driverId: null }],
+      OR: [
+        { driverId: sessionUserId },
+        { status: "READY", driverId: null },
+        { status: "ACCEPTED", driverId: null },
+      ],
     },
     select: driverOrderSelect,
     orderBy: { createdAt: "desc" },

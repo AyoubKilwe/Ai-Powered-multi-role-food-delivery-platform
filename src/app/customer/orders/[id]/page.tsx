@@ -19,14 +19,20 @@ interface Order {
   orderNumber: string;
   status: string;
   total: number;
-  deliveryAddress: string;
-  deliveryLat: number | null;
-  deliveryLng: number | null;
-  driverLat: number | null;
-  driverLng: number | null;
-  restaurant: { name: string; lat: number; lng: number };
-  driver: { name: string; phone: string } | null;
-  items: { quantity: number; menuItem: { name: string }; price: number }[];
+  createdAt?: string | null;
+  deliveryAddress?: string | null;
+  deliveryLat?: number | null;
+  deliveryLng?: number | null;
+  driverLat?: number | null;
+  driverLng?: number | null;
+  restaurant?: {
+    id?: string;
+    name?: string;
+    lat?: number;
+    lng?: number;
+  } | null;
+  driver?: { name?: string; phone?: string } | null;
+  items?: { quantity: number; menuItem?: { name?: string }; price?: number }[];
 }
 
 export default function OrderTrackPage() {
@@ -48,6 +54,7 @@ export default function OrderTrackPage() {
 
   if (!order) return <p>Loading...</p>;
 
+  const date = order.createdAt ? new Date(order.createdAt) : null;
   const showMap = ["DELIVERING", "PICKED_UP", "READY"].includes(order.status);
 
   return (
@@ -60,7 +67,11 @@ export default function OrderTrackPage() {
         {ORDER_STATUS_LABELS[order.status] || order.status}
       </p>
       <p className="text-sm">
-        From <strong>{order.restaurant.name}</strong> → {order.deliveryAddress}
+        From <strong>{order.restaurant?.name || "Unknown restaurant"}</strong>
+        {order.deliveryAddress ? ` → ${order.deliveryAddress}` : ""}
+      </p>
+      <p className="text-xs text-stone-400">
+        {date ? date.toLocaleString() : "Unknown time"}
       </p>
       {order.driver && (
         <p className="text-sm">
@@ -68,7 +79,7 @@ export default function OrderTrackPage() {
         </p>
       )}
 
-      {showMap && (
+      {showMap && order.restaurant?.lat && order.restaurant?.lng && (
         <div className="h-80">
           <DeliveryMap
             restaurant={{
@@ -92,12 +103,35 @@ export default function OrderTrackPage() {
       )}
 
       <ul className="rounded-xl border bg-white divide-y">
-        {order.items.map((item, i) => (
-          <li key={i} className="flex justify-between p-3">
-            <span>
-              {item.quantity}x {item.menuItem.name}
-            </span>
-            <span>{formatCurrency(item.price * item.quantity)}</span>
+        {(order.items || []).map((item, i) => (
+          <li key={i} className="flex items-center justify-between gap-3 p-3">
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-12 shrink-0 overflow-hidden rounded-md bg-stone-100">
+                {item.menuItem?.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={item.menuItem.image}
+                    alt={item.menuItem?.name}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-stone-400">
+                    IMG
+                  </div>
+                )}
+              </div>
+              <div>
+                <div className="font-medium text-sm text-stone-800">
+                  {item.menuItem?.name || "Item"}
+                </div>
+                <div className="text-xs text-stone-500">
+                  Qty: {item.quantity}
+                </div>
+              </div>
+            </div>
+            <div className="text-sm font-semibold text-stone-800">
+              {formatCurrency((item.price || 0) * item.quantity)}
+            </div>
           </li>
         ))}
         <li className="flex justify-between p-3 font-bold">

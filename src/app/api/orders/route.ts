@@ -28,13 +28,15 @@ export async function GET() {
 
   const orders = await db.order.findMany({
     where,
-    select: {
-      id: true,
-      orderNumber: true,
-      status: true,
-      total: true,
-      createdAt: true,
-      restaurant: { select: { name: true } },
+    include: {
+      restaurant: { select: { id: true, name: true } },
+      items: {
+        include: {
+          menuItem: {
+            select: { id: true, name: true, price: true, image: true },
+          },
+        },
+      },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -70,6 +72,7 @@ export async function POST(req: Request) {
   const order = await db.order.create({
     data: {
       orderNumber: generateOrderNumber(),
+      createdAt: new Date(),
       subtotal,
       serviceTax,
       deliveryFee,
@@ -124,5 +127,50 @@ export async function POST(req: Request) {
     },
   });
 
+  // Notify the restaurant owner (receptionist) about the new order so it appears
+  // in their messages/notifications and they can see it immediately.
+  try {
+    const ownerId = order.restaurant?.ownerId;
+    if (ownerId) {
+      await db.message.create({
+        data: {
+          senderId: session.user.id,
+          receiverId: ownerId,
+          content: `New order ${order.orderNumber} from ${order.customer?.name || "a customer"}`,
+          orderId: order.id,
+        },
+      });
+    }
+  } catch (err) {
+    // Non-fatal: if messaging fails, don't block the order creation
+    console.error("Failed to create owner notification:", err);
+  }
+
   return NextResponse.json(order, { status: 201 });
+}
+
+export async function DELETE() {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== "CUSTOMER") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Mark all orders for this customer as CANCELLED (soft-clear)
+  try {
+    const orders = await db.order.findMany({
+      where: { customerId: session.user.id },
+    });
+    await Promise.all(
+      (orders || []).map((o: any) =>
+        db.order.update({ where: { id: o.id }, data: { status: "CANCELLED" } }),
+      ),
+    );
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("Failed to clear orders:", err);
+    return NextResponse.json(
+      { error: "Failed to clear orders" },
+      { status: 500 },
+    );
+  }
 }

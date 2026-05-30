@@ -21,6 +21,21 @@ interface MenuCategory {
   name: string;
 }
 
+function isMenuItem(value: unknown): value is MenuItem {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as Partial<MenuItem>;
+  return (
+    typeof candidate.id === "string" &&
+    typeof candidate.name === "string" &&
+    typeof candidate.price === "number"
+  );
+}
+
+function normalizeItems(input: unknown): MenuItem[] {
+  if (!Array.isArray(input)) return [];
+  return input.filter(isMenuItem);
+}
+
 export default function MenuPage() {
   const [restaurantId, setRestaurantId] = useState("");
   const [items, setItems] = useState<MenuItem[]>([]);
@@ -41,11 +56,25 @@ export default function MenuPage() {
     fetch("/api/receptionist?view=menu")
       .then((r) => r.json())
       .then((d) => {
-        setRestaurantId(d.restaurant.id);
-        setCategories(d.restaurant.categories || []);
+        const restaurant = d?.restaurant;
+        const loadedCategories = Array.isArray(restaurant?.categories)
+          ? restaurant.categories
+          : [];
+        setRestaurantId(
+          typeof restaurant?.id === "string" ? restaurant.id : "",
+        );
+        setCategories(
+          loadedCategories.filter(
+            (c: unknown): c is MenuCategory =>
+              Boolean(c) &&
+              typeof c === "object" &&
+              typeof (c as MenuCategory).id === "string" &&
+              typeof (c as MenuCategory).name === "string",
+          ),
+        );
         setItems(
-          d.restaurant.categories.flatMap(
-            (c: { items: MenuItem[] }) => c.items,
+          loadedCategories.flatMap((c: unknown) =>
+            normalizeItems((c as { items?: unknown })?.items),
           ),
         );
       });
@@ -55,8 +84,18 @@ export default function MenuPage() {
     const data = await fetch(`/api/menu?restaurantId=${restaurantId}`).then(
       (r) => r.json(),
     );
-    setItems(data.items);
-    setCategories(data.categories);
+    setItems(normalizeItems(data?.items));
+    setCategories(
+      Array.isArray(data?.categories)
+        ? data.categories.filter(
+            (c: unknown): c is MenuCategory =>
+              Boolean(c) &&
+              typeof c === "object" &&
+              typeof (c as MenuCategory).id === "string" &&
+              typeof (c as MenuCategory).name === "string",
+          )
+        : [],
+    );
   }
 
   async function addCategory(e: React.FormEvent) {

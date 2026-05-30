@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
@@ -42,7 +41,6 @@ export default function RegisterClient() {
     vehicleType: "",
   });
   const [location, setLocation] = useState<LocationValue | null>(null);
-  const [restaurantLogo, setRestaurantLogo] = useState("");
   const [restaurantImages, setRestaurantImages] = useState<string[]>([]);
   const [driverDocs, setDriverDocs] = useState<Record<string, string>>({});
   const [uploading, setUploading] = useState<string | null>(null);
@@ -54,7 +52,7 @@ export default function RegisterClient() {
 
   async function handleFile(
     file: File,
-    folder: "restaurant-logos" | "restaurant-gallery" | "driver-docs",
+    folder: "restaurant-gallery" | "driver-docs",
     key: string,
     onDone: (url: string) => void,
   ) {
@@ -111,7 +109,6 @@ export default function RegisterClient() {
         restaurantPhones:
           form.role === "RECEPTIONIST" ? restaurantPhones : undefined,
         restaurantAbout: form.restaurantAbout,
-        restaurantLogo: restaurantLogo || undefined,
         restaurantImages:
           form.role === "RECEPTIONIST" ? restaurantImages : undefined,
         vehiclePlate: form.vehiclePlate,
@@ -256,31 +253,6 @@ export default function RegisterClient() {
                   placeholder="Tell customers about your food, hours, specialties..."
                 />
               </div>
-              <Input
-                label="Logo (image)"
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file)
-                    void handleFile(
-                      file,
-                      "restaurant-logos",
-                      "logo",
-                      setRestaurantLogo,
-                    );
-                }}
-              />
-              {restaurantLogo && (
-                <div className="relative h-20 w-20 overflow-hidden rounded-lg border">
-                  <Image
-                    src={restaurantLogo}
-                    alt="Logo"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              )}
               <Input
                 label="Restaurant photos (gallery)"
                 type="file"

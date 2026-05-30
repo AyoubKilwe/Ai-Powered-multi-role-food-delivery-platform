@@ -3,7 +3,6 @@ import { db } from "@/lib/db";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const cuisine = searchParams.get("cuisine");
   const minRating = searchParams.get("minRating");
   const maxPrice = searchParams.get("maxPrice");
   const maxDelivery = searchParams.get("maxDelivery");
@@ -11,8 +10,6 @@ export async function GET(req: Request) {
 
   const restaurants = await db.restaurant.findMany({
     where: {
-      isOpen: true,
-      ...(cuisine && cuisine !== "all" ? { cuisine } : {}),
       ...(minRating ? { rating: { gte: parseFloat(minRating) } } : {}),
       ...(maxPrice ? { minPrice: { lte: parseFloat(maxPrice) } } : {}),
       ...(maxDelivery ? { deliveryMins: { lte: parseInt(maxDelivery) } } : {}),
@@ -20,7 +17,6 @@ export async function GET(req: Request) {
         ? {
             OR: [
               { name: { contains: search } },
-              { cuisine: { contains: search } },
               { description: { contains: search } },
             ],
           }
@@ -30,8 +26,15 @@ export async function GET(req: Request) {
       menuItems: { where: { isAvailable: true }, take: 3 },
       _count: { select: { menuItems: true } },
     },
-    orderBy: { rating: "desc" },
+    orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json(restaurants);
+  return NextResponse.json(
+    restaurants.map((r) => ({
+      ...r,
+      rating: typeof r.rating === "number" ? r.rating : 4.5,
+      deliveryMins: typeof r.deliveryMins === "number" ? r.deliveryMins : 30,
+      minPrice: typeof r.minPrice === "number" ? r.minPrice : 5,
+    })),
+  );
 }

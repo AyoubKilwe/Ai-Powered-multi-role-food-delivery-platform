@@ -48,6 +48,24 @@ export async function POST(req: Request) {
     include: { restaurant: true, table: true },
   });
 
+  // Notify restaurant owner (receptionist) about the new booking so it appears in their inbox
+  try {
+    const restaurant = booking.restaurant;
+    const ownerId = restaurant?.ownerId;
+    if (ownerId) {
+      await db.message.create({
+        data: {
+          senderId: session.user.id,
+          receiverId: ownerId,
+          content: `New booking for ${booking.date.toString()} — ${booking.timeSlot} for ${booking.guests} guests`,
+          orderId: null,
+        },
+      });
+    }
+  } catch (err) {
+    console.error("Failed to notify owner about booking:", err);
+  }
+
   return NextResponse.json(booking, { status: 201 });
 }
 
@@ -58,9 +76,37 @@ export async function PATCH(req: Request) {
   }
 
   const { id, status } = await req.json();
-  const booking = await db.booking.update({
+  const existingBooking = await db.booking.findUnique({
+    where: { id },
+    include: { restaurant: true, customer: true, table: true },
+  });
+
+  if (!existingBooking) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  const updatedBooking = await db.booking.update({
     where: { id },
     data: { status },
   });
-  return NextResponse.json(booking);
+
+  if (status === "CONFIRMED" || status === "CANCELLED") {
+    try {
+      await db.message.create({
+        data: {
+          senderId: session.user.id,
+          receiverId: existingBooking.customerId,
+          content:
+            status === "CONFIRMED"
+              ? `Your booking at ${existingBooking.restaurant?.name || "the restaurant"} for ${new Date(existingBooking.date).toISOString().slice(0, 10)} was confirmed.`
+              : `Your booking at ${existingBooking.restaurant?.name || "the restaurant"} was cancelled.`,
+          orderId: null,
+        },
+      });
+    } catch (err) {
+      console.error("Failed to notify customer about booking status:", err);
+    }
+  }
+
+  return NextResponse.json(updatedBooking);
 }

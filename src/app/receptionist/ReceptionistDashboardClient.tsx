@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   Bell,
@@ -23,6 +23,11 @@ export default function ReceptionistDashboardClient() {
         orderNumber: string;
         status: string;
         total: number;
+        restaurant?: { name?: string } | null;
+        items?: {
+          quantity: number;
+          menuItem?: { name?: string; image?: string };
+        }[];
         customer: { name: string; phone: string | null };
       }[];
       bookingCount: number;
@@ -31,6 +36,28 @@ export default function ReceptionistDashboardClient() {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const prevOrderIdsRef = useRef<string[]>([]);
+
+  const playAlert = () => {
+    try {
+      const AudioCtx =
+        window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const oscillator = ctx.createOscillator();
+      const gain = ctx.createGain();
+      oscillator.type = "sine";
+      oscillator.frequency.value = 880;
+      gain.gain.value = 0.04;
+      oscillator.connect(gain);
+      gain.connect(ctx.destination);
+      oscillator.start();
+      oscillator.stop(ctx.currentTime + 0.18);
+      oscillator.onended = () => ctx.close();
+    } catch {
+      // ignore sound failures
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -51,6 +78,18 @@ export default function ReceptionistDashboardClient() {
           return;
         }
 
+        const nextOrders = payload?.restaurant?.orders || [];
+        const nextIds = nextOrders.map((o: any) => o.id);
+        const prevIds = prevOrderIdsRef.current;
+        if (
+          prevIds.length > 0 &&
+          nextIds.some((id: string) => !prevIds.includes(id)) &&
+          document.visibilityState === "visible"
+        ) {
+          playAlert();
+        }
+        prevOrderIdsRef.current = nextIds;
+
         setData(payload);
       } catch {
         if (!cancelled) {
@@ -63,9 +102,11 @@ export default function ReceptionistDashboardClient() {
     }
 
     void load();
+    const interval = setInterval(load, 5000);
 
     return () => {
       cancelled = true;
+      clearInterval(interval);
     };
   }, []);
 
@@ -226,17 +267,39 @@ export default function ReceptionistDashboardClient() {
                 key={o.id}
                 className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3"
               >
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="font-semibold text-stone-900">
-                      {o.orderNumber}
-                    </p>
-                    <Badge status={o.status} />
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 overflow-hidden rounded-xl bg-white shadow-sm">
+                    {o.items?.[0]?.menuItem?.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={o.items[0].menuItem.image}
+                        alt={o.items[0].menuItem.name || "Food"}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-xs text-stone-400">
+                        IMG
+                      </div>
+                    )}
                   </div>
-                  <p className="mt-1 text-sm text-stone-500">
-                    {o.customer.name}
-                    {o.customer.phone ? ` • ${o.customer.phone}` : ""}
-                  </p>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-stone-900">
+                        {o.orderNumber}
+                      </p>
+                      <Badge status={o.status} />
+                    </div>
+                    <p className="mt-1 text-sm text-stone-500">
+                      {o.restaurant?.name || "Unknown restaurant"}
+                      {o.items?.[0]?.menuItem?.name
+                        ? ` • ${o.items[0].menuItem.name}`
+                        : ""}
+                    </p>
+                    <p className="text-xs text-stone-400">
+                      {o.customer?.name ?? "Guest"}
+                      {o.customer?.phone ? ` • ${o.customer.phone}` : ""}
+                    </p>
+                  </div>
                 </div>
                 <div className="text-right">
                   <p className="font-bold text-stone-900">

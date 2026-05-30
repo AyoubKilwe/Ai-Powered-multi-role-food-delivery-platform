@@ -9,19 +9,25 @@ async function main() {
       email: "admin@boramafood.com",
       name: "Platform Admin",
       role: "ADMIN",
-      password: "password123",
+      password: "Admin@12345!",
+    },
+    {
+      email: "customer@boramafood.com",
+      name: "Demo Customer",
+      role: "CUSTOMER",
+      password: "Customer@12345!",
     },
     {
       email: "driver@boramafood.com",
       name: "Delivery Driver",
       role: "DRIVER",
-      password: "password123",
+      password: "Driver@12345!",
     },
     {
       email: "reception@hoyos.com",
       name: "Receptionist",
       role: "RECEPTIONIST",
-      password: "password123",
+      password: "Reception@12345!",
     },
   ];
 
@@ -58,7 +64,15 @@ async function main() {
 
 main()
   .then(() => {
-    console.log("Seeding complete. Use the demo passwords: password123");
+    console.log(
+      [
+        "Seeding complete. Demo login credentials:",
+        "- ADMIN: admin@boramafood.com / Admin@12345!",
+        "- CUSTOMER: customer@boramafood.com / Customer@12345!",
+        "- DRIVER: driver@boramafood.com / Driver@12345!",
+        "- RECEPTIONIST: reception@hoyos.com / Reception@12345!",
+      ].join("\n"),
+    );
     process.exit(0);
   })
   .catch((err) => {

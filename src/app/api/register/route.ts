@@ -24,7 +24,6 @@ const schema = z
     restaurantPhone: z.string().optional(),
     restaurantPhones: z.array(z.string()).optional(),
     restaurantAbout: z.string().optional(),
-    restaurantLogo: z.string().optional(),
     restaurantImages: z.array(z.string()).optional(),
     vehiclePlate: z.string().optional(),
     vehicleType: z.string().optional(),
@@ -130,8 +129,8 @@ export async function POST(req: Request) {
           lat: data.lat,
           lng: data.lng,
           description: data.restaurantAbout || "",
-          logo: data.restaurantLogo || null,
           images: data.restaurantImages || [],
+          isOpen: true,
           ownerId: user.id,
         },
       });

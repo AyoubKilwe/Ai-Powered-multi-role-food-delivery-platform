@@ -44,9 +44,55 @@ export async function PATCH(
 
   if (session.user.role === "RECEPTIONIST") {
     if (["ACCEPTED", "DECLINED", "COOKING", "READY"].includes(status)) {
+      const nextData: Record<string, unknown> = { status };
+
+      if (status === "ACCEPTED" && !order.driverId) {
+        const nearestDriver = await db.user.findFirst({
+          where: { role: "DRIVER", status: "ACTIVE" },
+          orderBy: { updatedAt: "desc" },
+        });
+        if (nearestDriver) {
+          nextData.driverId = nearestDriver.id;
+          nextData.driverLat = nearestDriver.lat;
+          nextData.driverLng = nearestDriver.lng;
+
+          await db.message.create({
+            data: {
+              senderId: session.user.id,
+              receiverId: nearestDriver.id,
+              content: `New delivery request for order ${order.orderNumber}`,
+              orderId: order.id,
+            },
+          });
+        }
+      }
+
+      if (
+        status === "ACCEPTED" ||
+        status === "DECLINED" ||
+        status === "READY" ||
+        status === "COOKING"
+      ) {
+        await db.message.create({
+          data: {
+            senderId: session.user.id,
+            receiverId: order.customerId,
+            content:
+              status === "ACCEPTED"
+                ? `Your order ${order.orderNumber} was accepted.`
+                : status === "DECLINED"
+                  ? `Your order ${order.orderNumber} was declined.`
+                  : status === "COOKING"
+                    ? `Your order ${order.orderNumber} is now being prepared.`
+                    : `Your order ${order.orderNumber} is ready for delivery.`,
+            orderId: order.id,
+          },
+        });
+      }
+
       const updated = await db.order.update({
         where: { id },
-        data: { status },
+        data: nextData,
       });
       return NextResponse.json(updated);
     }

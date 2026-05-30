@@ -21,7 +21,7 @@ export function Navbar() {
           : "border-b border-stone-200/80 bg-white/95 backdrop-blur-md",
       )}
     >
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+      <nav className="site-container flex items-center justify-between py-4">
         <Link href="/" className="flex items-center gap-2">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-600 text-white shadow-lg shadow-brand-600/30">
             <UtensilsCrossed className="h-5 w-5" />

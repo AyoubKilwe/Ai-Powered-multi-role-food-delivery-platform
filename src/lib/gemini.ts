@@ -8,8 +8,10 @@ type MenuItemSummary = {
 };
 
 const SYSTEM_PROMPT = `You are Food Bot, the AI assistant for Borama Food Delivery in Borama, Somaliland.
-You help customers discover food, compare dishes, answer questions about delivery, bookings, and restaurants.
-Be warm, concise, and helpful. You may respond in English or Somali if the user writes in Somali.
+Your job is to answer every user question helpfully, not to remain silent.
+Always reply in the same language as the user when possible; if the user writes in Somali, answer in Somali first.
+If the question is broad or unrelated to menus, still give a useful, friendly answer and offer food app help.
+You help customers discover food, compare dishes, answer questions about delivery, bookings, support, and restaurants.
 When recommending food, mention real items from the menu data provided.
 Delivery: typically 25-45 min in Borama. Service tax 5%, delivery fee $2.50.
 Never invent restaurants or menu items not in the context.`;
@@ -68,9 +70,13 @@ export async function askGemini(
     })),
   });
 
-  const result = await chat.sendMessage(userMessage);
-  return (
-    result.response.text() ||
-    "I could not generate a response. Please try again."
-  );
+  try {
+    const result = await chat.sendMessage(userMessage);
+    return (
+      result.response.text() ||
+      "Waan isku dayay laakiin jawaab cad ma soo bixin. Fadlan su'aashaada si kale u qor, aniguna mar kale ayaan kaa caawin doonaa."
+    );
+  } catch {
+    return "Gemini hadda si ku-meel-gaar ah ayuu mashquulsan yahay, laakiin waan joogaa: ii qor su'aashaada cunto, restaurant, delivery, booking, ama support — waxaan kuugu jawaabi doonaa Soomaali ama Ingiriisi.";
+  }
 }

@@ -20,7 +20,7 @@ export default function ChatbotPage() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "bot",
-      text: "Salaan! I'm your Gemini-powered Food Assistant for Borama. Ask me about any cuisine, dish, restaurant, or delivery — in English or Somali!",
+      text: "Salaan! I'm your Food AI assistant for Borama. Ask me about any cuisine, dish, restaurant, or delivery — in English or Somali!",
     },
   ]);
   const [input, setInput] = useState("");
@@ -35,7 +35,10 @@ export default function ChatbotPage() {
     if (!text.trim() || loading) return;
     const userMsg = text.trim();
     setInput("");
-    const newMessages: Message[] = [...messages, { role: "user", text: userMsg }];
+    const newMessages: Message[] = [
+      ...messages,
+      { role: "user", text: userMsg },
+    ];
     setMessages(newMessages);
     setLoading(true);
 
@@ -47,27 +50,49 @@ export default function ChatbotPage() {
         text: m.text,
       }));
 
-    const res = await fetch("/api/chatbot", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: userMsg, history }),
-    });
-    const data = await res.json();
-    setMessages((m) => [...m, { role: "bot", text: data.reply || data.error || "No response" }]);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/chatbot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userMsg, history }),
+      });
+      const data = await res.json();
+      setMessages((m) => [
+        ...m,
+        {
+          role: "bot",
+          text:
+            data.reply ||
+            data.error ||
+            "I couldn't generate a reply right now, but try asking again.",
+        },
+      ]);
+    } catch {
+      setMessages((m) => [
+        ...m,
+        {
+          role: "bot",
+          text: "Sorry, I couldn't reach the AI service right now. Try again in a moment.",
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <section className="mx-auto flex h-[calc(100vh-10rem)] max-w-3xl flex-col overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-xl">
-      <header className="flex items-center gap-4 border-b bg-gradient-to-r from-brand-600 to-amber-500 px-6 py-5 text-white">
+      <header className="flex items-center gap-4 border-b bg-linear-to-r from-brand-600 to-amber-500 px-6 py-5 text-white">
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20 backdrop-blur">
           <Bot className="h-6 w-6" />
         </div>
         <div>
           <h2 className="flex items-center gap-2 text-lg font-bold">
-            Food AI <Sparkles className="h-4 w-4" />
+            Food AI Assistant <Sparkles className="h-4 w-4" />
           </h2>
-          <p className="text-sm text-orange-100">Powered by Google Gemini · Knows all Borama menus</p>
+          <p className="text-sm text-orange-100">
+            Ask for meals, restaurants, delivery info, or recommendations.
+          </p>
         </div>
       </header>
 

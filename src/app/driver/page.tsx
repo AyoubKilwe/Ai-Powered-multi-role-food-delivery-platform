@@ -88,7 +88,9 @@ export default function DriverPage() {
           <p className="text-sm">
             {o.restaurant.name} → {o.deliveryAddress}
           </p>
-          <p className="text-sm text-stone-500">Customer: {o.customer.name}</p>
+          <p className="text-sm text-stone-500">
+            Customer: {o.customer?.name ?? "Guest"}
+          </p>
           <p className="font-bold text-brand-600">{formatCurrency(o.total)}</p>
           <div className="mt-3 flex flex-wrap gap-2">
             {o.customer.phone && (
@@ -110,7 +112,7 @@ export default function DriverPage() {
             </span>
           </div>
           <div className="mt-3 flex gap-2">
-            {o.status === "READY" && (
+            {(o.status === "READY" || o.status === "ACCEPTED") && (
               <Button size="sm" onClick={() => acceptOrder(o.id)}>
                 Accept delivery
               </Button>

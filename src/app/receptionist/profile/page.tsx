@@ -10,7 +10,6 @@ export default function ProfilePage() {
   const [account, setAccount] = useState({ name: "", phone: "" });
   const [profile, setProfile] = useState({
     name: "",
-    logo: "",
     phone: "",
     phonesExtra: "",
     about: "",
@@ -28,7 +27,27 @@ export default function ProfilePage() {
   const [newTable, setNewTable] = useState({ tableNumber: "", capacity: "" });
   const [newSlot, setNewSlot] = useState({ start: "", end: "", capacity: "" });
   const [locating, setLocating] = useState(false);
-  const [uploadingLogo, setUploadingLogo] = useState(false);
+
+  async function refreshProfile() {
+    const d = await fetch("/api/receptionist?view=profile").then((r) =>
+      r.json(),
+    );
+    const phones: string[] = d.restaurant.phones || [];
+    const main = d.restaurant.phone || phones[0] || "";
+    const extra = phones.filter((p: string) => p !== main);
+    setProfile({
+      name: d.restaurant.name,
+      phone: main,
+      phonesExtra: extra.join(", "),
+      about: d.restaurant.description || "",
+      images: d.restaurant.images || [],
+      address: d.restaurant.address,
+      lat: d.restaurant.lat,
+      lng: d.restaurant.lng,
+    });
+    setTables(d.restaurant.tables || []);
+    setTimeSlots(d.restaurant.timeSlots || []);
+  }
 
   useEffect(() => {
     Promise.all([
@@ -43,7 +62,6 @@ export default function ProfilePage() {
       const extra = phones.filter((p: string) => p !== main);
       setProfile({
         name: d.restaurant.name,
-        logo: d.restaurant.logo || "",
         phone: main,
         phonesExtra: extra.join(", "),
         about: d.restaurant.description || "",
@@ -56,23 +74,6 @@ export default function ProfilePage() {
       setTimeSlots(d.restaurant.timeSlots || []);
     });
   }, []);
-
-  async function uploadLogo(file: File) {
-    setUploadingLogo(true);
-    const fd = new FormData();
-    fd.append("file", file);
-    const res = await fetch("/api/uploads?folder=restaurant-logos", {
-      method: "POST",
-      body: fd,
-    });
-    const data = await res.json();
-    setUploadingLogo(false);
-    if (!res.ok) {
-      alert(data.error || "Logo upload failed");
-      return;
-    }
-    setProfile((p) => ({ ...p, logo: data.url }));
-  }
 
   async function uploadGallery(file: File) {
     const fd = new FormData();
@@ -114,7 +115,6 @@ export default function ProfilePage() {
       body: JSON.stringify({
         profile: {
           name: profile.name,
-          logo: profile.logo,
           phone: phones[0] || profile.phone,
           phones,
           description: profile.about,
@@ -166,10 +166,7 @@ export default function ProfilePage() {
       }),
     });
     setNewTable({ tableNumber: "", capacity: "" });
-    const d = await fetch("/api/receptionist?view=profile").then((r) =>
-      r.json(),
-    );
-    setTables(d.restaurant.tables);
+    await refreshProfile();
   }
 
   return (
@@ -196,30 +193,6 @@ export default function ProfilePage() {
             value={profile.name}
             onChange={(e) => setProfile({ ...profile, name: e.target.value })}
           />
-          <Input
-            label="Restaurant logo"
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) void uploadLogo(file);
-            }}
-          />
-          <p className="text-xs text-stone-500">
-            {uploadingLogo
-              ? "Uploading logo..."
-              : "Upload an image logo for your restaurant profile."}
-          </p>
-          {profile.logo && (
-            <div className="relative h-28 overflow-hidden rounded-xl border bg-stone-50">
-              <Image
-                src={profile.logo}
-                alt={`${profile.name || "Restaurant"} logo`}
-                fill
-                className="object-cover"
-              />
-            </div>
-          )}
           <Input
             label="Main phone"
             value={profile.phone}
@@ -311,14 +284,20 @@ export default function ProfilePage() {
         </form>
       </Card>
       <Card title="Dine-in tables">
-        <ul className="mb-4 space-y-2">
+        <div className="mb-4 grid gap-2 sm:grid-cols-2">
           {tables.map((t) => (
-            <li key={t.id} className="text-sm">
-              Table {t.tableNumber} — {t.capacity} seats
-            </li>
+            <div
+              key={t.id}
+              className="rounded-xl border border-stone-200 bg-stone-50 p-3 text-sm"
+            >
+              <p className="font-semibold text-stone-900">
+                Table {t.tableNumber}
+              </p>
+              <p className="text-stone-600">{t.capacity} seats</p>
+            </div>
           ))}
-        </ul>
-        <form onSubmit={addTable} className="flex gap-2">
+        </div>
+        <form onSubmit={addTable} className="grid gap-2 sm:grid-cols-3">
           <Input
             placeholder="Table #"
             value={newTable.tableNumber}
@@ -341,7 +320,7 @@ export default function ProfilePage() {
           {timeSlots.map((slot) => (
             <li
               key={slot.id}
-              className="text-sm flex items-center justify-between gap-3"
+              className="flex items-center justify-between gap-3 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-sm"
             >
               <span>
                 {slot.label} — up to {slot.capacity} guests
@@ -357,10 +336,7 @@ export default function ProfilePage() {
                       timeSlot: { action: "delete", id: slot.id },
                     }),
                   });
-                  const d = await fetch("/api/receptionist").then((r) =>
-                    r.json(),
-                  );
-                  setTimeSlots(d.restaurant.timeSlots || []);
+                  await refreshProfile();
                 }}
               >
                 Remove
@@ -384,10 +360,7 @@ export default function ProfilePage() {
               }),
             });
             setNewSlot({ start: "", end: "", capacity: "" });
-            const d = await fetch("/api/receptionist?view=profile").then((r) =>
-              r.json(),
-            );
-            setTimeSlots(d.restaurant.timeSlots || []);
+            await refreshProfile();
           }}
           className="grid gap-2 sm:grid-cols-4"
         >
