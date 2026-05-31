@@ -76,10 +76,10 @@ export async function PATCH(req: Request) {
   }
 
   const { id, status } = await req.json();
-  const existingBooking = await db.booking.findUnique({
+  const existingBooking = (await db.booking.findMany({
     where: { id },
     include: { restaurant: true, customer: true, table: true },
-  });
+  }))[0];
 
   if (!existingBooking) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });

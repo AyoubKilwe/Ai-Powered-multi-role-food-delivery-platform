@@ -40,14 +40,16 @@ export function FloatingHomeSupport({
     const userMsg = text.trim();
     setInput("");
 
-    const newMessages = [...messages, { role: "user", text: userMsg } as const];
+    const newMessages = [...messages, { role: "user", text: userMsg } as Message];
     setMessages(newMessages);
     setLoading(true);
 
-    const history = newMessages.slice(0, -1).map((m) => ({
-      role: (m.role === "user" ? "user" : "model") as const,
-      text: m.text,
-    }));
+    const history: { role: "user" | "model"; text: string }[] = newMessages
+      .slice(0, -1)
+      .map((m) => ({
+        role: m.role === "user" ? "user" : "model",
+        text: m.text,
+      }));
 
     try {
       const res = await fetch("/api/chatbot", {

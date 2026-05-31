@@ -20,6 +20,10 @@ interface Order {
   }[];
 }
 
+interface OrderApiRow extends Order {
+  status: string;
+}
+
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [clearing, setClearing] = useState(false);
@@ -32,7 +36,7 @@ export default function OrdersPage() {
         .then((data) => {
           if (!mounted) return;
           const visible = Array.isArray(data)
-            ? data.filter((o: any) => o.status !== "CANCELLED")
+            ? data.filter((o: OrderApiRow) => o.status !== "CANCELLED")
             : [];
           setOrders(visible);
         })

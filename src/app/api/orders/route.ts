@@ -155,13 +155,15 @@ export async function DELETE() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  type CustomerOrderRow = { id: string };
+
   // Mark all orders for this customer as CANCELLED (soft-clear)
   try {
     const orders = await db.order.findMany({
       where: { customerId: session.user.id },
     });
     await Promise.all(
-      (orders || []).map((o: any) =>
+      (orders || []).map((o: CustomerOrderRow) =>
         db.order.update({ where: { id: o.id }, data: { status: "CANCELLED" } }),
       ),
     );

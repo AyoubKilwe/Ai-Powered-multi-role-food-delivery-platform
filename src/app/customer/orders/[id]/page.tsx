@@ -32,7 +32,11 @@ interface Order {
     lng?: number;
   } | null;
   driver?: { name?: string; phone?: string } | null;
-  items?: { quantity: number; menuItem?: { name?: string }; price?: number }[];
+  items?: {
+    quantity: number;
+    menuItem?: { name?: string; image?: string };
+    price?: number;
+  }[];
 }
 
 export default function OrderTrackPage() {
@@ -85,12 +89,12 @@ export default function OrderTrackPage() {
             restaurant={{
               lat: order.restaurant.lat,
               lng: order.restaurant.lng,
-              name: order.restaurant.name,
+              name: order.restaurant.name ?? "Restaurant",
             }}
             customer={{
               lat: order.deliveryLat ?? BORAMA_CENTER.lat + 0.002,
               lng: order.deliveryLng ?? BORAMA_CENTER.lng + 0.002,
-              label: order.deliveryAddress,
+              label: order.deliveryAddress ?? "Delivery location",
             }}
             driver={
               order.driverLat && order.driverLng

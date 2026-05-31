@@ -15,21 +15,23 @@ import { Badge } from "@/components/ui/Badge";
 import { formatCurrency } from "@/lib/utils";
 
 export default function ReceptionistDashboardClient() {
+  type DashboardOrder = {
+    id: string;
+    orderNumber: string;
+    status: string;
+    total: number;
+    restaurant?: { name?: string } | null;
+    items?: {
+      quantity: number;
+      menuItem?: { name?: string; image?: string };
+    }[];
+    customer: { name: string; phone: string | null };
+  };
+
   const [data, setData] = useState<{
     restaurant: {
       name: string;
-      orders: {
-        id: string;
-        orderNumber: string;
-        status: string;
-        total: number;
-        restaurant?: { name?: string } | null;
-        items?: {
-          quantity: number;
-          menuItem?: { name?: string; image?: string };
-        }[];
-        customer: { name: string; phone: string | null };
-      }[];
+      orders: DashboardOrder[];
       bookingCount: number;
     };
     sales: { daily: { revenue: number; orders: number } };
@@ -40,8 +42,7 @@ export default function ReceptionistDashboardClient() {
 
   const playAlert = () => {
     try {
-      const AudioCtx =
-        window.AudioContext || (window as any).webkitAudioContext;
+      const AudioCtx = window.AudioContext;
       if (!AudioCtx) return;
       const ctx = new AudioCtx();
       const oscillator = ctx.createOscillator();
@@ -78,8 +79,8 @@ export default function ReceptionistDashboardClient() {
           return;
         }
 
-        const nextOrders = payload?.restaurant?.orders || [];
-        const nextIds = nextOrders.map((o: any) => o.id);
+        const nextOrders = (payload?.restaurant?.orders || []) as DashboardOrder[];
+        const nextIds = nextOrders.map((o) => o.id);
         const prevIds = prevOrderIdsRef.current;
         if (
           prevIds.length > 0 &&
