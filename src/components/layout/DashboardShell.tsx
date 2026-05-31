@@ -98,8 +98,8 @@ export function DashboardShell({
   );
 
   return (
-    <div className="flex min-h-screen bg-stone-100">
-      <aside className="hidden w-72 shrink-0 flex-col bg-linear-to-b from-brand-700 via-brand-600 to-amber-700 lg:flex">
+    <div className="flex min-h-screen overflow-x-hidden bg-stone-100">
+      <aside className="sticky top-0 hidden h-screen w-72 shrink-0 flex-col overflow-y-auto bg-linear-to-b from-brand-700 via-brand-600 to-amber-700 lg:flex">
         {sidebar}
       </aside>
 
@@ -111,15 +111,15 @@ export function DashboardShell({
             className="absolute inset-0 bg-black/50"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="relative flex h-full w-72 flex-col bg-linear-to-b from-brand-700 to-amber-700">
+          <aside className="relative flex h-full w-[85vw] max-w-xs flex-col overflow-y-auto bg-linear-to-b from-brand-700 to-amber-700">
             {sidebar}
           </aside>
         </div>
       )}
 
-      <main className="flex-1 overflow-auto">
-        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-stone-200 bg-white/95 px-4 py-4 backdrop-blur sm:px-6">
-          <div className="flex items-center gap-3">
+      <main className="min-w-0 flex-1 overflow-auto">
+        <header className="sticky top-0 z-10 flex flex-col gap-3 border-b border-stone-200 bg-white/95 px-4 py-4 backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
               className="rounded-lg border border-stone-200 p-2 transition hover:bg-stone-50 lg:hidden"
@@ -128,13 +128,40 @@ export function DashboardShell({
             >
               <Menu className="h-5 w-5" />
             </button>
-            <h1 className="text-xl font-bold text-stone-900">{title}</h1>
+            <h1 className="truncate text-xl font-bold text-stone-900">{title}</h1>
           </div>
-          <span className="hidden rounded-full bg-brand-100 px-3 py-1 text-xs font-semibold text-brand-800 shadow-sm sm:inline">
-            {session?.user?.role}
-          </span>
+          <div className="flex items-center gap-3 self-start sm:self-auto">
+            {session?.user?.role === "RECEPTIONIST" && (
+              <button
+                className="hidden items-center gap-2 rounded-lg border border-stone-200 bg-white px-3 py-1 text-sm font-semibold text-stone-700 hover:bg-stone-50 sm:inline-flex"
+                onClick={async () => {
+                  try {
+                    const res = await fetch(`/api/receptionist/payouts?range=monthly`);
+                    if (!res.ok) throw new Error("Export failed");
+                    const blob = await res.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `payouts-monthly.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                  } catch (err) {
+                    // Fallback simple alert
+                    alert("Could not export payouts. Use the dashboard Export card instead.");
+                  }
+                }}
+              >
+                Export CSV
+              </button>
+            )}
+            <span className="rounded-full bg-brand-100 px-3 py-1 text-xs font-semibold text-brand-800 shadow-sm sm:inline">
+              {session?.user?.role}
+            </span>
+          </div>
         </header>
-        <div className="p-4 sm:p-6 lg:p-8">{children}</div>
+        <div className="p-3 sm:p-6 lg:p-8">{children}</div>
       </main>
     </div>
   );

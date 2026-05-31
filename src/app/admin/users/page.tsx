@@ -20,6 +20,7 @@ interface User {
   phone?: string;
   role: string;
   status: string;
+  createdAt?: string;
   vehiclePlate?: string;
   vehicleType?: string;
   driverDocuments?: DriverDoc[];
@@ -39,7 +40,15 @@ export default function UsersPage() {
   const load = () =>
     fetch("/api/admin?view=users")
       .then((r) => r.json())
-      .then((d) => setUsers(d.users || []));
+      .then((d) => {
+        const nextUsers = Array.isArray(d.users) ? [...d.users] : [];
+        nextUsers.sort(
+          (a, b) =>
+            new Date(b.createdAt || 0).getTime() -
+            new Date(a.createdAt || 0).getTime(),
+        );
+        setUsers(nextUsers);
+      });
 
   useEffect(() => {
     load();
@@ -68,6 +77,19 @@ export default function UsersPage() {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId, status }),
+    });
+    load();
+  }
+
+  async function deleteUser(userId: string) {
+    if (!confirm("Delete this account permanently? This cannot be undone.")) {
+      return;
+    }
+
+    await fetch("/api/admin", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "delete", userId }),
     });
     load();
   }
@@ -144,7 +166,7 @@ export default function UsersPage() {
       </div>
 
       <div className="overflow-x-auto rounded-3xl border border-stone-200 bg-white shadow-sm">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm" style={{ minWidth: 760 }}>
           <thead className="bg-stone-50 text-left text-stone-600">
             <tr>
               <th className="p-4">Name</th>
@@ -206,6 +228,13 @@ export default function UsersPage() {
                           Suspend
                         </Button>
                       )}
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        onClick={() => deleteUser(u.id)}
+                      >
+                        Delete
+                      </Button>
                     </div>
                   </td>
                 </tr>

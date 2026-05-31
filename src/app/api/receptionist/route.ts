@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { PLATFORM_FEE_RATE } from "@/lib/utils";
 
 type View = "dashboard" | "orders" | "bookings" | "menu" | "profile";
 
@@ -32,6 +33,8 @@ const bookingSelect = {
   timeSlot: true,
   guests: true,
   status: true,
+  customerNameSnapshot: true,
+  customerPhoneSnapshot: true,
   table: { select: { tableNumber: true, capacity: true } },
   customer: { select: { name: true, phone: true } },
 } as const;
@@ -131,7 +134,7 @@ async function loadRestaurantContext(
 
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "RECEPTIONIST") return unauthorized();
+  if (!session || session.user.role !== "RECEPTIONIST" || session.user.status !== "ACTIVE") return unauthorized();
 
   const { searchParams } = new URL(request.url);
   const view = (searchParams.get("view") || "dashboard") as View;
@@ -264,6 +267,52 @@ export async function GET(request: Request) {
       _count: true,
     }),
   ]);
+  // Also compute payout breakdowns (restaurant payout after driver & platform fees)
+  const [dailyAgg, weeklyAgg, monthlyAgg] = await Promise.all([
+    db.order.aggregate({
+      where: {
+        restaurantId: restaurant.id,
+        status: "DELIVERED",
+        createdAt: { gte: startOfDay },
+      },
+      _sum: { subtotal: true, deliveryFee: true, serviceTax: true },
+      _count: true,
+    }),
+    db.order.aggregate({
+      where: {
+        restaurantId: restaurant.id,
+        status: "DELIVERED",
+        createdAt: { gte: weekAgo },
+      },
+      _sum: { subtotal: true, deliveryFee: true, serviceTax: true },
+      _count: true,
+    }),
+    db.order.aggregate({
+      where: {
+        restaurantId: restaurant.id,
+        status: "DELIVERED",
+        createdAt: { gte: monthAgo },
+      },
+      _sum: { subtotal: true, deliveryFee: true, serviceTax: true },
+      _count: true,
+    }),
+  ]);
+
+  function toNumbers(agg: unknown) {
+    const a = agg as { _sum?: { subtotal?: number; deliveryFee?: number; serviceTax?: number }; _count?: number };
+    const subtotal = (a?._sum?.subtotal as number) || 0;
+    const deliveryFee = (a?._sum?.deliveryFee as number) || 0;
+    const serviceTax = (a?._sum?.serviceTax as number) || 0;
+    const orders = a?._count || 0;
+    const restaurantPayout = subtotal * (1 - PLATFORM_FEE_RATE); // matches transaction creation logic
+    const driverFee = orders * 1; // fixed $1 per delivered order
+    const platformFee = subtotal * PLATFORM_FEE_RATE;
+    return { subtotal, deliveryFee, serviceTax, orders, restaurantPayout, driverFee, platformFee };
+  }
+
+  const d = toNumbers(dailyAgg);
+  const w = toNumbers(weeklyAgg);
+  const m = toNumbers(monthlyAgg);
 
   return NextResponse.json({
     restaurant: {
@@ -273,16 +322,16 @@ export async function GET(request: Request) {
       bookingCount,
     },
     sales: {
-      daily: { revenue: daily._sum.total || 0, orders: daily._count },
-      weekly: { revenue: weekly._sum.total || 0, orders: weekly._count },
-      monthly: { revenue: monthly._sum.total || 0, orders: monthly._count },
+      daily: { revenue: daily._sum.total || 0, orders: daily._count, payout: d.restaurantPayout, driverFee: d.driverFee, tax: d.serviceTax, platformFee: d.platformFee },
+      weekly: { revenue: weekly._sum.total || 0, orders: weekly._count, payout: w.restaurantPayout, driverFee: w.driverFee, tax: w.serviceTax, platformFee: w.platformFee },
+      monthly: { revenue: monthly._sum.total || 0, orders: monthly._count, payout: m.restaurantPayout, driverFee: m.driverFee, tax: m.serviceTax, platformFee: m.platformFee },
     },
   });
 }
 
 export async function PATCH(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "RECEPTIONIST") return unauthorized();
+  if (!session || session.user.role !== "RECEPTIONIST" || session.user.status !== "ACTIVE") return unauthorized();
 
   const restaurant = await loadRestaurantContext(
     session.user.id,

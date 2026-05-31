@@ -15,7 +15,15 @@ export async function GET(
       restaurant: true,
       customer: { select: { id: true, name: true, phone: true } },
       driver: {
-        select: { id: true, name: true, phone: true, lat: true, lng: true },
+        select: {
+          id: true,
+          name: true,
+          phone: true,
+          vehicleType: true,
+          vehiclePlate: true,
+          lat: true,
+          lng: true,
+        },
       },
     },
   });
@@ -28,7 +36,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await getServerSession(authOptions);
-  if (!session)
+  if (!session || session.user.status !== "ACTIVE")
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
@@ -90,6 +98,25 @@ export async function PATCH(
         });
       }
 
+      if (status === "READY") {
+        const drivers = order.driverId
+          ? await db.user.findMany({ where: { id: order.driverId, role: "DRIVER", status: "ACTIVE" } })
+          : await db.user.findMany({ where: { role: "DRIVER", status: "ACTIVE" } });
+
+        await Promise.all(
+          drivers.map((driver) =>
+            db.message.create({
+              data: {
+                senderId: session.user.id,
+                receiverId: driver.id,
+                content: `Order ${order.orderNumber} is ready for pickup from ${order.restaurant?.name || "the restaurant"}.`,
+                orderId: order.id,
+              },
+            }),
+          ),
+        );
+      }
+
       const updated = await db.order.update({
         where: { id },
         data: nextData,
@@ -109,7 +136,7 @@ export async function PATCH(
     });
 
     if (status === "DELIVERED") {
-      const driverFee = order.deliveryFee * 0.6;
+      const driverFee = 1;
       await db.driverCommission.upsert({
         where: { orderId: id },
         create: { amount: driverFee, orderId: id, driverId: session.user.id },
@@ -119,9 +146,9 @@ export async function PATCH(
         where: { orderId: id },
         create: {
           orderId: id,
-          restaurantPayout: order.subtotal * 0.85,
+          restaurantPayout: order.subtotal * 0.95,
           driverFee,
-          platformFee: order.subtotal * 0.1,
+          platformFee: order.subtotal * 0.05,
           serviceTax: order.serviceTax,
           total: order.total,
         },

@@ -7,6 +7,9 @@ export default withAuth(
     const path = req.nextUrl.pathname;
 
     if (!token) return NextResponse.redirect(new URL("/login", req.url));
+    if (token.status !== "ACTIVE") {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
 
     const role = token.role as string;
     const rolePaths: Record<string, string> = {

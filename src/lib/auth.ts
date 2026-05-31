@@ -119,6 +119,25 @@ export const authOptions: NextAuthOptions = {
         token.role = user.role;
         token.status = user.status;
         token.restaurantId = user.restaurantId;
+        return token;
+      }
+
+      if (token.id && token.id !== "admin-env") {
+        const { db } = await import("./db");
+        const liveUser = await db.user.findUnique({
+          where: { id: token.id },
+          include: { restaurant: true },
+        });
+
+        if (!liveUser) {
+          token.status = "DELETED";
+          return token;
+        }
+
+        token.role = liveUser.role;
+        token.status = liveUser.status;
+        token.restaurantId =
+          (liveUser.restaurant as { id?: string } | null)?.id;
       }
       return token;
     },

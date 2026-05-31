@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
 import { BORAMA_CENTER } from "@/lib/utils";
 
@@ -27,6 +27,27 @@ interface DeliveryMapProps {
   height?: string;
 }
 
+function FitBounds({ points }: { points: [number, number][] }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!points.length) return;
+
+    if (points.length === 1) {
+      map.setView(points[0], 15, { animate: true });
+      return;
+    }
+
+    map.fitBounds(points, {
+      padding: [50, 50],
+      maxZoom: 16,
+      animate: true,
+    });
+  }, [map, points]);
+
+  return null;
+}
+
 export default function DeliveryMap({
   restaurant,
   customer,
@@ -37,20 +58,18 @@ export default function DeliveryMap({
     delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })._getIconUrl;
   }, []);
 
-  const center = driver
-    ? { lat: driver.lat, lng: driver.lng }
-    : restaurant
-      ? { lat: restaurant.lat, lng: restaurant.lng }
-      : BORAMA_CENTER;
-
   const points: [number, number][] = [];
   if (restaurant) points.push([restaurant.lat, restaurant.lng]);
   if (driver) points.push([driver.lat, driver.lng]);
   if (customer) points.push([customer.lat, customer.lng]);
 
+  const center =
+    points[0] || [BORAMA_CENTER.lat, BORAMA_CENTER.lng];
+
   return (
     <div style={{ height }} className="w-full overflow-hidden rounded-xl">
-      <MapContainer center={[center.lat, center.lng]} zoom={14} style={{ height: "100%", width: "100%" }}>
+      <MapContainer center={center} zoom={14} style={{ height: "100%", width: "100%" }}>
+        <FitBounds points={points} />
         <TileLayer
           attribution='&copy; OpenStreetMap'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -70,7 +89,38 @@ export default function DeliveryMap({
             <Popup>Driver location</Popup>
           </Marker>
         )}
-        {points.length >= 2 && <Polyline positions={points} color="#ea580c" weight={4} dashArray="8 8" />}
+        {restaurant && driver && (
+          <Polyline
+            positions={[
+              [restaurant.lat, restaurant.lng],
+              [driver.lat, driver.lng],
+            ]}
+            color="#ea580c"
+            weight={4}
+            dashArray="8 8"
+          />
+        )}
+        {driver && customer && (
+          <Polyline
+            positions={[
+              [driver.lat, driver.lng],
+              [customer.lat, customer.lng],
+            ]}
+            color="#2563eb"
+            weight={4}
+          />
+        )}
+        {!driver && restaurant && customer && (
+          <Polyline
+            positions={[
+              [restaurant.lat, restaurant.lng],
+              [customer.lat, customer.lng],
+            ]}
+            color="#ea580c"
+            weight={4}
+            dashArray="8 8"
+          />
+        )}
       </MapContainer>
     </div>
   );

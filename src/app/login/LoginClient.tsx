@@ -93,11 +93,8 @@ export default function LoginClient({
     ? defaultRole
     : availableRoles[0]?.value || "CUSTOMER";
   const [selectedRole, setSelectedRole] = useState<Role>(fallbackRole);
-  const [email, setEmail] = useState(
-    allRoles.find((role) => role.value === fallbackRole)?.demoEmail ||
-      "customer@boramafood.com",
-  );
-  const [password, setPassword] = useState("password123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -105,7 +102,7 @@ export default function LoginClient({
 
   function selectRole(role: RoleOption) {
     setSelectedRole(role.value);
-    setEmail(role.demoEmail);
+    setEmail("");
     setError("");
   }
 

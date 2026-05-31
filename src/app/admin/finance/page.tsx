@@ -16,7 +16,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { DollarSign, TrendingUp, Wallet } from "lucide-react";
+import { DollarSign, TrendingUp, Wallet, ReceiptText, Users, Store, ShieldCheck } from "lucide-react";
 
 interface Transaction {
   id: string;
@@ -26,7 +26,7 @@ interface Transaction {
   platformFee: number;
   serviceTax: number;
   createdAt: string;
-  order: { orderNumber: string };
+  order?: { orderNumber?: string } | null;
 }
 
 export default function FinancePage() {
@@ -45,8 +45,9 @@ export default function FinancePage() {
     fetch("/api/admin?view=finance")
       .then((r) => r.json())
       .then((d) => {
-        setTransactions(d.transactions);
-        const totals = d.transactions.reduce(
+        const rows = Array.isArray(d.transactions) ? d.transactions : [];
+        setTransactions(rows);
+        const totals = rows.reduce(
           (acc: typeof summary, t: Transaction) => ({
             total: acc.total + t.total,
             tax: acc.tax + t.serviceTax,
@@ -82,6 +83,15 @@ export default function FinancePage() {
     { name: "Platform", value: summary.platform },
     { name: "Tax", value: summary.tax },
   ].filter((item) => item.value > 0);
+
+  const summaryCards = [
+    { label: "Gross sales", value: summary.total, icon: DollarSign, tone: "brand" },
+    { label: "Service tax", value: summary.tax, icon: TrendingUp, tone: "orange" },
+    { label: "Restaurant payout", value: summary.restaurant, icon: Store, tone: "emerald" },
+    { label: "Driver fees", value: summary.driver, icon: Users, tone: "blue" },
+    { label: "Platform fee", value: summary.platform, icon: ShieldCheck, tone: "violet" },
+    { label: "Settled orders", value: transactions.length, icon: ReceiptText, tone: "stone", integer: true },
+  ] as const;
 
   if (loading) {
     return (
@@ -140,72 +150,34 @@ export default function FinancePage() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        <Card className="border-stone-200 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-100 text-brand-700">
-              <DollarSign className="h-6 w-6" />
-            </div>
-            <div>
-              <p className="text-sm text-stone-500">Gross sales</p>
-              <p className="text-2xl font-bold">
-                {formatCurrency(summary.total)}
-              </p>
-            </div>
-          </div>
-        </Card>
-        <Card className="border-stone-200 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-100 text-orange-700">
-              <TrendingUp className="h-6 w-6" />
-            </div>
-            <div>
-              <p className="text-sm text-stone-500">Service tax</p>
-              <p className="text-2xl font-bold">
-                {formatCurrency(summary.tax)}
-              </p>
-            </div>
-          </div>
-        </Card>
-        <Card className="border-stone-200 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
-              <Wallet className="h-6 w-6" />
-            </div>
-            <div>
-              <p className="text-sm text-stone-500">Restaurant payout</p>
-              <p className="text-2xl font-bold">
-                {formatCurrency(summary.restaurant)}
-              </p>
-            </div>
-          </div>
-        </Card>
-        <Card className="border-stone-200 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
-              <Wallet className="h-6 w-6" />
-            </div>
-            <div>
-              <p className="text-sm text-stone-500">Driver fees</p>
-              <p className="text-2xl font-bold">
-                {formatCurrency(summary.driver)}
-              </p>
-            </div>
-          </div>
-        </Card>
-        <Card className="border-stone-200 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-100 text-violet-700">
-              <Wallet className="h-6 w-6" />
-            </div>
-            <div>
-              <p className="text-sm text-stone-500">Platform fee</p>
-              <p className="text-2xl font-bold">
-                {formatCurrency(summary.platform)}
-              </p>
-            </div>
-          </div>
-        </Card>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {summaryCards.map((card) => {
+          const Icon = card.icon;
+          const toneClasses = {
+            brand: "bg-brand-100 text-brand-700",
+            orange: "bg-orange-100 text-orange-700",
+            emerald: "bg-emerald-100 text-emerald-700",
+            blue: "bg-blue-100 text-blue-700",
+            violet: "bg-violet-100 text-violet-700",
+            stone: "bg-stone-100 text-stone-700",
+          } as const;
+
+          return (
+            <Card key={card.label} className="border-stone-200 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${toneClasses[card.tone]}`}>
+                  <Icon className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="text-sm text-stone-500">{card.label}</p>
+                  <p className="text-2xl font-bold">
+                    {card.integer ? card.value : formatCurrency(card.value)}
+                  </p>
+                </div>
+              </div>
+            </Card>
+          );
+        })}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
@@ -272,51 +244,41 @@ export default function FinancePage() {
         </Card>
       </div>
 
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-stone-900">
-          Recent transactions
-        </h3>
-        {transactions.map((t) => (
-          <article
-            key={t.id}
-            className="rounded-3xl border border-stone-200 bg-white p-5 shadow-sm transition hover:shadow-md"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="font-semibold text-stone-900">
-                  {t.order.orderNumber}
-                </p>
-                <p className="text-xs text-stone-500">
-                  {new Date(t.createdAt).toLocaleString()}
-                </p>
+      <Card title="Settlement ledger" subtitle="Each order with its complete finance split">
+        <div className="overflow-x-auto rounded-2xl border border-stone-200">
+          <div style={{ minWidth: 760 }}>
+          <div className="grid grid-cols-6 gap-3 border-b border-stone-200 bg-stone-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-stone-500">
+            <span>Order</span>
+            <span>Gross</span>
+            <span>Tax</span>
+            <span>Restaurant</span>
+            <span>Driver</span>
+            <span>Platform</span>
+          </div>
+
+          <div className="divide-y divide-stone-200 bg-white">
+            {transactions.map((t) => (
+              <div key={t.id} className="grid grid-cols-6 gap-3 px-4 py-4 text-sm">
+                <div>
+                    <p className="font-semibold text-stone-900">
+                      {t.order?.orderNumber ? `Order ${t.order.orderNumber}` : "Settlement"}
+                    </p>
+                  <p className="text-xs text-stone-500">{new Date(t.createdAt).toLocaleString()}</p>
+                </div>
+                <div className="font-semibold text-stone-900">{formatCurrency(t.total)}</div>
+                <div className="text-stone-700">{formatCurrency(t.serviceTax)}</div>
+                <div className="text-stone-700">{formatCurrency(t.restaurantPayout)}</div>
+                <div className="text-stone-700">{formatCurrency(t.driverFee)}</div>
+                <div className="text-stone-700">{formatCurrency(t.platformFee)}</div>
               </div>
-              <p className="text-lg font-black text-brand-600">
-                {formatCurrency(t.total)}
-              </p>
-            </div>
-            <div className="mt-4 grid gap-2 text-sm sm:grid-cols-5">
-              <span className="rounded-xl bg-stone-50 px-3 py-2">
-                Tax: {formatCurrency(t.serviceTax)}
-              </span>
-              <span className="rounded-xl bg-stone-50 px-3 py-2">
-                Restaurant: {formatCurrency(t.restaurantPayout)}
-              </span>
-              <span className="rounded-xl bg-stone-50 px-3 py-2">
-                Driver: {formatCurrency(t.driverFee)}
-              </span>
-              <span className="rounded-xl bg-stone-50 px-3 py-2">
-                Platform: {formatCurrency(t.platformFee)}
-              </span>
-              <span className="rounded-xl bg-stone-50 px-3 py-2">
-                Gross: {formatCurrency(t.total)}
-              </span>
-            </div>
-          </article>
-        ))}
-        {transactions.length === 0 && (
-          <p className="text-stone-500">No transactions yet.</p>
-        )}
-      </div>
+            ))}
+            {transactions.length === 0 && (
+              <div className="px-4 py-8 text-center text-stone-500">No transactions yet.</div>
+            )}
+          </div>
+          </div>
+        </div>
+      </Card>
     </section>
   );
 }

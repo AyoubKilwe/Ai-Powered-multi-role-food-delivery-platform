@@ -6,7 +6,12 @@ import { formatCurrency } from "@/lib/utils";
 
 export default function CommissionsPage() {
   const [data, setData] = useState<{
-    commissions: { id: string; amount: number; createdAt: string }[];
+    commissions: {
+      id: string;
+      amount: number;
+      createdAt: string;
+      order?: { orderNumber?: string } | null;
+    }[];
     totalCommission: number;
   } | null>(null);
 
@@ -20,21 +25,26 @@ export default function CommissionsPage() {
 
   return (
     <section className="space-y-6">
-      <Card title="Total earnings">
+      <Card title="Delivery earnings">
         <p className="text-4xl font-bold text-brand-600">
           {formatCurrency(data.totalCommission)}
         </p>
         <p className="text-sm text-stone-500">
-          {data.commissions.length} completed deliveries
+          Money earned from completed deliveries
         </p>
       </Card>
-      <h3 className="font-semibold">Commission history</h3>
+      <h3 className="font-semibold">Delivery payout history</h3>
       {data.commissions.map((c) => (
         <div
           key={c.id}
           className="flex justify-between rounded-xl border bg-white p-4"
         >
-          <span>{new Date(c.createdAt).toLocaleDateString()}</span>
+          <span>
+            {c.order?.orderNumber ? `Order ${c.order.orderNumber}` : "Delivery"}
+            <span className="ml-2 text-xs text-stone-500">
+              {new Date(c.createdAt).toLocaleDateString()}
+            </span>
+          </span>
           <span className="font-bold text-green-600">
             +{formatCurrency(c.amount)}
           </span>

@@ -40,6 +40,7 @@ export function Navbar() {
           {[
             "Features|/#features",
             "How it Works|/#how-it-works",
+            "Contact Us|/#contact-us",
             "Restaurants|/#restaurants",
           ].map((item) => {
             const [label, href] = item.split("|");
@@ -93,13 +94,27 @@ export function Navbar() {
               : "border-stone-200 bg-white",
           )}
         >
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 text-sm">
             <Link
               href="/#features"
               onClick={() => setOpen(false)}
               className={isHome ? "text-white" : ""}
             >
               Features
+            </Link>
+            <Link
+              href="/#how-it-works"
+              onClick={() => setOpen(false)}
+              className={isHome ? "text-white" : ""}
+            >
+              How it works
+            </Link>
+            <Link
+              href="/#contact-us"
+              onClick={() => setOpen(false)}
+              className={isHome ? "text-white" : ""}
+            >
+              Contact us
             </Link>
             <Link
               href="/login"

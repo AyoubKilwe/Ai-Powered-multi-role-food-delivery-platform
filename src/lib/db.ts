@@ -593,7 +593,20 @@ async function populateDriverCommission(
   select?: Record<string, unknown>,
 ) {
   if (!comm) return null;
+  const db = await getDb();
   const out: Record<string, unknown> = { ...normalizeDocument(comm) };
+  if (include?.order) {
+    const orderId = toObjectId(out.orderId);
+    const order = orderId
+      ? await db.collection("orders").findOne({ _id: orderId })
+      : null;
+    out.order = order
+      ? await populateOrder(
+          order,
+          include.order === true ? undefined : include.order,
+        )
+      : null;
+  }
   return applySelect(out as any, select);
 }
 
@@ -872,6 +885,7 @@ export const db = {
     create: (options: any) => insertOneModel("user", options.data, options),
     update: (options: any) =>
       updateOneModel("user", options.where, options.data, options),
+    delete: (options: any) => deleteOneModel("user", options.where),
     count: (options?: any) => countModel("user", options?.where),
   },
   restaurant: {

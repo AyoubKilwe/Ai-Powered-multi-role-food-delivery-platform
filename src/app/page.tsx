@@ -13,6 +13,7 @@ import {
   ShoppingBag,
   Bike,
   Smile,
+  MessageCircle,
 } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/Button";
@@ -339,6 +340,46 @@ export default function HomePage() {
                 Get Started Free
               </Button>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact us */}
+      <section id="contact-us" className="bg-stone-950 py-20 sm:py-24">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+          <div className="rounded-3xl border border-stone-800 bg-stone-900 p-7 shadow-2xl sm:p-10 lg:p-12">
+            <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between lg:gap-12">
+              <div className="max-w-2xl space-y-4">
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-brand-400">
+                  Contact us
+                </p>
+                <h2 className="text-3xl font-black leading-tight text-white sm:text-4xl lg:text-5xl">
+                  Need help or want to place an order?
+                </h2>
+                <p className="max-w-xl text-base leading-8 text-stone-300 sm:text-lg">
+                  Reach us on WhatsApp for quick support, orders, booking help,
+                  or restaurant inquiries.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                <a
+                  href="https://wa.me/2520636279674?text=Salaan%2C%20waxaan%20u%20baahanahay%20caawimo%20BoramaFood."
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-emerald-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-500/20 transition hover:-translate-y-0.5 sm:w-auto"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  WhatsApp Support
+                </a>
+                <a
+                  href="mailto:support@boramafood.com"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10 sm:w-auto"
+                >
+                  Contact us
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </section>

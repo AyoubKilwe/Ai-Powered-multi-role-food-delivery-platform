@@ -10,6 +10,7 @@ const adminUserSelect = {
   phone: true,
   role: true,
   status: true,
+  createdAt: true,
   vehiclePlate: true,
   vehicleType: true,
 } as const;
@@ -20,7 +21,7 @@ function unauthorized() {
 
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "ADMIN") {
+  if (!session || session.user.role !== "ADMIN" || session.user.status !== "ACTIVE") {
     return unauthorized();
   }
 
@@ -146,7 +147,7 @@ export async function GET(request: Request) {
 
 export async function PATCH(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "ADMIN") {
+  if (!session || session.user.role !== "ADMIN" || session.user.status !== "ACTIVE") {
     return unauthorized();
   }
 
@@ -165,6 +166,11 @@ export async function PATCH(req: Request) {
       });
     }
     return NextResponse.json(user);
+  }
+
+  if (action === "delete" && userId) {
+    await db.user.delete({ where: { id: userId } });
+    return NextResponse.json({ success: true });
   }
 
   if (action === "dispute" && orderId) {

@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
-  if (!session)
+  if (!session || session.user.status !== "ACTIVE")
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const user = await db.user.findUnique({
@@ -30,7 +30,7 @@ export async function GET() {
 
 export async function PATCH(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session)
+  if (!session || session.user.status !== "ACTIVE")
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();

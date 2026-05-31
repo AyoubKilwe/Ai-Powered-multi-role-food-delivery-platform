@@ -22,6 +22,7 @@ export default async function CustomerHomePage() {
         deliveryMins: true,
         minPrice: true,
         logo: true,
+        images: true,
         description: true,
         address: true,
         lat: true,

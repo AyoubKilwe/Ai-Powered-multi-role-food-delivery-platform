@@ -11,6 +11,7 @@ const colors: Record<string, string> = {
   CANCELLED: "bg-stone-100 text-stone-600",
   ACTIVE: "bg-green-100 text-green-800",
   SUSPENDED: "bg-red-100 text-red-800",
+  DELETED: "bg-stone-200 text-stone-700",
   CONFIRMED: "bg-green-100 text-green-800",
 };
 

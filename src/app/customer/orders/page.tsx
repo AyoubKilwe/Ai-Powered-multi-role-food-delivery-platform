@@ -13,6 +13,12 @@ interface Order {
   total: number;
   createdAt: string | null;
   restaurant?: { name?: string } | null;
+  driver?: {
+    name?: string;
+    phone?: string | null;
+    vehicleType?: string | null;
+    vehiclePlate?: string | null;
+  } | null;
   items?: {
     quantity: number;
     menuItem?: { name?: string; image?: string };
@@ -78,6 +84,9 @@ export default function OrdersPage() {
       </div>
       {orders.map((o) => {
         const date = o.createdAt ? new Date(o.createdAt) : null;
+        const showDriverDetails = ["PICKED_UP", "DELIVERING", "READY", "DELIVERED"].includes(
+          o.status,
+        );
         return (
           <Link
             key={o.id}
@@ -112,6 +121,17 @@ export default function OrdersPage() {
                 <p className="text-xs text-stone-400">
                   {date ? date.toLocaleString() : "Unknown time"}
                 </p>
+                {showDriverDetails && o.driver && (
+                  <div className="mt-2 rounded-xl bg-stone-50 p-3 text-xs text-stone-700">
+                    <p className="font-semibold text-stone-900">Driver accepted</p>
+                    <p>Name: {o.driver.name ?? "Driver"}</p>
+                    <p>Phone: {o.driver.phone || "Not provided"}</p>
+                    <p>
+                      Vehicle: {o.driver.vehicleType || "Vehicle"}
+                      {o.driver.vehiclePlate ? ` • Plate: ${o.driver.vehiclePlate}` : ""}
+                    </p>
+                  </div>
+                )}
               </div>
               <div className="text-right">
                 <Badge status={o.status} />

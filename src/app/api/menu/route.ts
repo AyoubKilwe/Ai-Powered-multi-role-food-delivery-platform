@@ -56,6 +56,7 @@ export async function POST(req: Request) {
   if (
     !session ||
     session.user.role !== "RECEPTIONIST" ||
+    session.user.status !== "ACTIVE" ||
     !session.user.restaurantId
   ) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -86,7 +87,7 @@ export async function POST(req: Request) {
 
 export async function PATCH(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "RECEPTIONIST") {
+  if (!session || session.user.role !== "RECEPTIONIST" || session.user.status !== "ACTIVE") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -125,7 +126,7 @@ export async function PATCH(req: Request) {
 
 export async function DELETE(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "RECEPTIONIST") {
+  if (!session || session.user.role !== "RECEPTIONIST" || session.user.status !== "ACTIVE") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

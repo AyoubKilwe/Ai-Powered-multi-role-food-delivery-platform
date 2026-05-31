@@ -23,6 +23,7 @@ export type RestaurantSummary = {
   deliveryMins: number;
   minPrice: number;
   logo: string | null;
+  images?: string[];
   description: string | null;
   address?: string | null;
   lat?: number | null;
@@ -283,18 +284,24 @@ export default function CustomerHomeClient({
                 className="group overflow-hidden rounded-2xl border border-brand-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
               >
                 <div className="relative h-48 bg-stone-100">
-                  {r.logo ? (
-                    <Image
-                      src={r.logo}
-                      alt={r.name}
-                      fill
-                      className="object-cover transition duration-500 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center bg-linear-to-br from-brand-500 to-amber-500 text-5xl font-black text-white">
-                      {r.name.charAt(0)}
-                    </div>
-                  )}
+                  {(() => {
+                    const imageSrc = r.logo || (r.images && r.images.length > 0 ? r.images[0] : null);
+                    if (imageSrc) {
+                      return (
+                        <Image
+                          src={imageSrc}
+                          alt={r.name}
+                          fill
+                          className="object-cover transition duration-500 group-hover:scale-105"
+                        />
+                      );
+                    }
+                    return (
+                      <div className="flex h-full items-center justify-center bg-linear-to-br from-brand-500 to-amber-500 text-5xl font-black text-white">
+                        {r.name.charAt(0)}
+                      </div>
+                    );
+                  })()}
                   <div className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-brand-700 shadow">
                     {r.distanceKm !== null
                       ? `${r.distanceKm.toFixed(1)} km away`
@@ -343,18 +350,24 @@ export default function CustomerHomeClient({
               className="group overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="relative h-48 bg-stone-100">
-                {r.logo ? (
-                  <Image
-                    src={r.logo}
-                    alt={r.name}
-                    fill
-                    className="object-cover transition duration-500 group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center bg-linear-to-br from-brand-500 to-amber-500 text-5xl font-black text-white">
-                    {r.name.charAt(0)}
-                  </div>
-                )}
+                {(() => {
+                  const imageSrc = r.logo || (r.images && r.images.length > 0 ? r.images[0] : null);
+                  if (imageSrc) {
+                    return (
+                      <Image
+                        src={imageSrc}
+                        alt={r.name}
+                        fill
+                        className="object-cover transition duration-500 group-hover:scale-105"
+                      />
+                    );
+                  }
+                  return (
+                    <div className="flex h-full items-center justify-center bg-linear-to-br from-brand-500 to-amber-500 text-5xl font-black text-white">
+                      {r.name.charAt(0)}
+                    </div>
+                  );
+                })()}
                 {r.distanceKm !== null && (
                   <div className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-brand-700 shadow">
                     {r.distanceKm.toFixed(1)} km away

@@ -15,6 +15,10 @@ interface Order {
   items: { quantity: number; menuItem: { name: string } }[];
 }
 
+function normalizeStatus(status?: string | null) {
+  return status && status !== "Unknown" ? status : "PENDING";
+}
+
 export default function ReceptionistOrdersClient() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [updating, setUpdating] = useState(false);
@@ -53,9 +57,9 @@ export default function ReceptionistOrdersClient() {
     load();
   }
 
-  const pending = orders.filter((o) => o.status === "PENDING").length;
-  const cooking = orders.filter((o) => o.status === "COOKING").length;
-  const ready = orders.filter((o) => o.status === "READY").length;
+  const pending = orders.filter((o) => normalizeStatus(o.status) === "PENDING").length;
+  const cooking = orders.filter((o) => normalizeStatus(o.status) === "COOKING").length;
+  const ready = orders.filter((o) => normalizeStatus(o.status) === "READY").length;
 
   return (
     <section className="space-y-6">
@@ -103,7 +107,7 @@ export default function ReceptionistOrdersClient() {
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Badge status={o.status} />
+                <Badge status={normalizeStatus(o.status)} />
                 <p className="font-black text-brand-600">
                   {formatCurrency(o.total)}
                 </p>
@@ -128,7 +132,7 @@ export default function ReceptionistOrdersClient() {
                   <Phone className="h-4 w-4" /> Call customer
                 </a>
               )}
-              {o.status === "PENDING" && (
+              {normalizeStatus(o.status) === "PENDING" && (
                 <>
                   <Button
                     size="sm"
@@ -147,7 +151,7 @@ export default function ReceptionistOrdersClient() {
                   </Button>
                 </>
               )}
-              {o.status === "ACCEPTED" && (
+              {normalizeStatus(o.status) === "ACCEPTED" && (
                 <Button
                   size="sm"
                   onClick={() => updateStatus(o.id, "COOKING")}
@@ -156,7 +160,7 @@ export default function ReceptionistOrdersClient() {
                   Start cooking
                 </Button>
               )}
-              {o.status === "COOKING" && (
+              {normalizeStatus(o.status) === "COOKING" && (
                 <Button
                   size="sm"
                   onClick={() => updateStatus(o.id, "READY")}

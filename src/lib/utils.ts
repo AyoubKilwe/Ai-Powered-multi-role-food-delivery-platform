@@ -18,15 +18,16 @@ export function generateOrderNumber() {
 }
 
 export const SERVICE_TAX_RATE = 0.05;
-export const DELIVERY_FEE = 2.5;
+export const DELIVERY_FEE = 1;
 export const DRIVER_COMMISSION_RATE = 0.15;
-export const PLATFORM_FEE_RATE = 0.1;
+export const PLATFORM_FEE_RATE = 0.05;
 
 export function calculateOrderTotals(subtotal: number) {
   const serviceTax = subtotal * SERVICE_TAX_RATE;
   const deliveryFee = DELIVERY_FEE;
-  const total = subtotal + serviceTax + deliveryFee;
-  return { subtotal, serviceTax, deliveryFee, total };
+  const platformFee = subtotal * PLATFORM_FEE_RATE;
+  const total = subtotal + serviceTax + deliveryFee + platformFee;
+  return { subtotal, serviceTax, deliveryFee, platformFee, total };
 }
 
 export const BORAMA_CENTER = { lat: 9.934, lng: 43.181 };

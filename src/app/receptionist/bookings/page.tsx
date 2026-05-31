@@ -11,7 +11,13 @@ interface Booking {
   guests: number;
   status: string;
   customer: { name: string; phone: string | null };
+  customerNameSnapshot?: string | null;
+  customerPhoneSnapshot?: string | null;
   table: { tableNumber: number; capacity: number } | null;
+}
+
+function normalizeStatus(status?: string | null) {
+  return status && status !== "Unknown" ? status : "PENDING";
 }
 
 export default function BookingsPage() {
@@ -52,30 +58,45 @@ export default function BookingsPage() {
     <section className="space-y-4">
       <h2 className="text-xl font-bold">Table reservations</h2>
       {bookings.map((b) => (
-        <article key={b.id} className="rounded-xl border bg-white p-4">
-          <div className="flex justify-between">
-            <div>
-              <p className="font-semibold">{b.customer?.name ?? "Guest"}</p>
-              <p className="text-sm">
+        <article key={b.id} className="rounded-2xl border bg-white p-4 shadow-sm transition hover:shadow-md">
+          <div className="flex items-start justify-between gap-3">
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="font-semibold text-lg">
+                  {b.customer?.name || b.customerNameSnapshot || "Guest"}
+                </p>
+                <Badge status={normalizeStatus(b.status)} />
+              </div>
+              <p className="text-sm text-stone-500">
+                Phone: {b.customer?.phone || b.customerPhoneSnapshot || "Not provided"}
+              </p>
+              <p className="text-sm text-stone-600">
                 {new Date(b.date).toLocaleDateString()} — {b.timeSlot}
               </p>
               <p className="text-sm text-stone-500">
-                {b.guests} guests {b.table && `• Table ${b.table.tableNumber}`}
+                {b.guests} guests {b.table ? `• Table ${b.table.tableNumber} (${b.table.capacity} seats)` : "• Any available table"}
               </p>
             </div>
-            <Badge status={b.status} />
+            {(b.customer?.phone || b.customerPhoneSnapshot) && (
+              <a
+                href={`tel:${b.customer?.phone || b.customerPhoneSnapshot}`}
+                className="inline-flex items-center rounded-xl border px-3 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50"
+              >
+                Call customer
+              </a>
+            )}
           </div>
-          {b.status === "PENDING" && (
-            <div className="mt-3 flex gap-2">
-              <Button size="sm" onClick={() => updateStatus(b.id, "CONFIRMED")}>
-                Confirm
+          {normalizeStatus(b.status) === "PENDING" && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => updateStatus(b.id, "CONFIRMED") }>
+                Accept booking
               </Button>
               <Button
                 size="sm"
                 variant="danger"
                 onClick={() => updateStatus(b.id, "CANCELLED")}
               >
-                Cancel
+                Decline
               </Button>
             </div>
           )}

@@ -6,7 +6,7 @@ import { calculateOrderTotals, generateOrderNumber } from "@/lib/utils";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
-  if (!session)
+  if (!session || session.user.status !== "ACTIVE")
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   let receptionistRestaurantId = session.user.restaurantId;
@@ -30,6 +30,17 @@ export async function GET() {
     where,
     include: {
       restaurant: { select: { id: true, name: true } },
+      driver: {
+        select: {
+          id: true,
+          name: true,
+          phone: true,
+          vehicleType: true,
+          vehiclePlate: true,
+          lat: true,
+          lng: true,
+        },
+      },
       items: {
         include: {
           menuItem: {
@@ -46,7 +57,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "CUSTOMER") {
+  if (!session || session.user.role !== "CUSTOMER" || session.user.status !== "ACTIVE") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -67,15 +78,17 @@ export async function POST(req: Request) {
       sum + i.price * i.quantity,
     0,
   );
-  const { serviceTax, deliveryFee, total } = calculateOrderTotals(subtotal);
+  const { serviceTax, deliveryFee, platformFee, total } = calculateOrderTotals(subtotal);
 
   const order = await db.order.create({
     data: {
       orderNumber: generateOrderNumber(),
+      status: "PENDING",
       createdAt: new Date(),
       subtotal,
       serviceTax,
       deliveryFee,
+      platformFee,
       total,
       notes,
       customerId: session.user.id,
@@ -151,7 +164,7 @@ export async function POST(req: Request) {
 
 export async function DELETE() {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "CUSTOMER") {
+  if (!session || session.user.role !== "CUSTOMER" || session.user.status !== "ACTIVE") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

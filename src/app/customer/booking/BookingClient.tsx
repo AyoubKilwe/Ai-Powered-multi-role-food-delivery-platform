@@ -34,6 +34,7 @@ export default function BookingClient() {
     timeSlot: "",
     guests: "2",
     tableId: "",
+    phone: "",
   });
   const [msg, setMsg] = useState("");
 
@@ -41,6 +42,17 @@ export default function BookingClient() {
     fetch("/api/restaurants")
       .then((r) => r.json())
       .then(setRestaurants);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/user")
+      .then((r) => r.json())
+      .then((u) => {
+        if (u?.phone) {
+          setForm((f) => ({ ...f, phone: u.phone }));
+        }
+      })
+      .catch(() => undefined);
   }, []);
 
   useEffect(() => {
@@ -155,6 +167,14 @@ export default function BookingClient() {
           max={12}
           value={form.guests}
           onChange={(e) => setForm({ ...form, guests: e.target.value })}
+        />
+        <Input
+          label="Phone number"
+          type="tel"
+          placeholder="e.g. +252 6..."
+          value={form.phone}
+          onChange={(e) => setForm({ ...form, phone: e.target.value })}
+          required
         />
         {msg && <p className="text-sm text-brand-600">{msg}</p>}
         <Button type="submit" className="w-full">

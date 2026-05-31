@@ -118,6 +118,8 @@ export default function ProfilePage() {
           phone: phones[0] || profile.phone,
           phones,
           description: profile.about,
+          // promote first gallery image to logo so it appears in listings
+          logo: profile.images && profile.images.length > 0 ? profile.images[0] : null,
           images: profile.images,
           address: profile.address,
           lat: profile.lat,
@@ -238,6 +240,26 @@ export default function ProfilePage() {
                   className="relative h-16 w-16 overflow-hidden rounded-lg border"
                 >
                   <Image src={src} alt="" fill className="object-cover" />
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      // set this image as the restaurant logo
+                      const res = await fetch("/api/receptionist", {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ profile: { logo: src } }),
+                      });
+                      if (res.ok) {
+                        setProfile((p) => ({ ...p, images: p.images, /* keep images */ }));
+                        alert("Set as logo");
+                      } else {
+                        alert("Failed to set logo");
+                      }
+                    }}
+                    className="absolute left-1/2 -translate-x-1/2 bottom-1 hidden rounded-md bg-black/60 px-2 py-1 text-xs text-white hover:bg-black/75 group-hover:block"
+                  >
+                    Use as logo
+                  </button>
                 </div>
               ))}
             </div>

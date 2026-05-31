@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
-  if (!session)
+  if (!session || session.user.status !== "ACTIVE")
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const where =
@@ -30,16 +30,24 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "CUSTOMER") {
+  if (!session || session.user.role !== "CUSTOMER" || session.user.status !== "ACTIVE") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { restaurantId, date, timeSlot, guests, tableId } = await req.json();
+  const body = await req.json();
+  const { restaurantId, date, timeSlot, guests, tableId } = body;
+  const customerPhone =
+    typeof body?.phone === "string" && body.phone.trim()
+      ? body.phone.trim()
+      : ((session.user as { phone?: string }).phone || "");
 
   const booking = await db.booking.create({
     data: {
       restaurantId,
       customerId: session.user.id,
+      customerNameSnapshot: session.user.name || "Guest",
+      customerPhoneSnapshot: customerPhone,
+      status: "PENDING",
       date: new Date(date),
       timeSlot,
       guests: parseInt(guests),
@@ -71,7 +79,7 @@ export async function POST(req: Request) {
 
 export async function PATCH(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "RECEPTIONIST") {
+  if (!session || session.user.role !== "RECEPTIONIST" || session.user.status !== "ACTIVE") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
