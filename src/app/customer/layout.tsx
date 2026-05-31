@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { CartProvider } from "@/context/CartContext";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 

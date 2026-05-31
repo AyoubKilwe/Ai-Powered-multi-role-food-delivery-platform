@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { formatCurrency } from "@/lib/utils";

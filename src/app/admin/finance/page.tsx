@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useEffect, useMemo, useState } from "react";
 import { formatCurrency } from "@/lib/utils";
 import { Card } from "@/components/ui/Card";
@@ -28,6 +30,14 @@ interface Transaction {
   createdAt: string;
   order?: { orderNumber?: string } | null;
 }
+
+type SummaryCard = {
+  label: string;
+  value: number;
+  icon: React.ComponentType<{ className?: string }>;
+  tone: "brand" | "orange" | "emerald" | "blue" | "violet" | "stone";
+  integer?: boolean;
+};
 
 export default function FinancePage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -84,14 +94,14 @@ export default function FinancePage() {
     { name: "Tax", value: summary.tax },
   ].filter((item) => item.value > 0);
 
-  const summaryCards = [
+  const summaryCards: SummaryCard[] = [
     { label: "Gross sales", value: summary.total, icon: DollarSign, tone: "brand" },
     { label: "Service tax", value: summary.tax, icon: TrendingUp, tone: "orange" },
     { label: "Restaurant payout", value: summary.restaurant, icon: Store, tone: "emerald" },
     { label: "Driver fees", value: summary.driver, icon: Users, tone: "blue" },
     { label: "Platform fee", value: summary.platform, icon: ShieldCheck, tone: "violet" },
     { label: "Settled orders", value: transactions.length, icon: ReceiptText, tone: "stone", integer: true },
-  ] as const;
+  ];
 
   if (loading) {
     return (
